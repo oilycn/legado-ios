@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23504" systemVersion="23F79" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
-    <entity name="Book" representedClassName="Book" syncable="YES" codeGenerationType="manual">
+    <entity name="Book" representedClassName="Book" syncable="YES" codeGenerationType="none">
         <attribute name="bookId" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="name" optional="NO" attributeType="String"/>
         <attribute name="author" optional="NO" attributeType="String"/>
@@ -43,7 +43,7 @@
         <relationship name="chapters" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="BookChapter" inverseName="book" inverseEntity="BookChapter"/>
         <relationship name="bookmarks" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Bookmark" inverseName="book" inverseEntity="Bookmark"/>
     </entity>
-    <entity name="BookSource" representedClassName="BookSource" syncable="YES" codeGenerationType="manual">
+    <entity name="BookSource" representedClassName="BookSource" syncable="YES" codeGenerationType="none">
         <attribute name="sourceId" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="bookSourceUrl" optional="NO" attributeType="String"/>
         <attribute name="bookSourceName" optional="NO" attributeType="String"/>
@@ -78,7 +78,7 @@
         <attribute name="variable" optional="YES" attributeType="String"/>
         <relationship name="books" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Book" inverseName="source" inverseEntity="Book"/>
     </entity>
-    <entity name="BookChapter" representedClassName="BookChapter" syncable="YES" codeGenerationType="manual">
+    <entity name="BookChapter" representedClassName="BookChapter" syncable="YES" codeGenerationType="none">
         <attribute name="chapterId" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="bookId" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="chapterUrl" optional="NO" attributeType="String"/>
@@ -95,7 +95,7 @@
         <attribute name="tag" optional="YES" attributeType="String"/>
         <relationship name="book" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Book" inverseName="chapters" inverseEntity="Book"/>
     </entity>
-    <entity name="Bookmark" representedClassName="Bookmark" syncable="YES" codeGenerationType="manual">
+    <entity name="Bookmark" representedClassName="Bookmark" syncable="YES" codeGenerationType="none">
         <attribute name="bookmarkId" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="bookId" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="chapterIndex" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
