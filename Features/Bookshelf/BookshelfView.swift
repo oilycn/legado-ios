@@ -244,9 +244,9 @@ struct BookCoverView: View {
     
     private func loadImage(urlString: String) async {
         // 使用 ImageCacheManager 实现内存+磁盘缓存
-        let cached = await ImageCacheManager.shared.loadImage(for: urlString)
+        let cached = await ImageCacheManager.shared.loadImage(from: urlString)
         if let cached = cached {
-            imageData = cached
+            imageData = cached.pngData()
         }
     }
 }

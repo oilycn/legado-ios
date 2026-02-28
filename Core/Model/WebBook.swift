@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreData
+import SwiftSoup
 
 /// 搜索结果
 struct SearchBook {
@@ -277,12 +278,12 @@ class WebBook {
         
         guard let ruleStr = contentRule.content, !ruleStr.isEmpty else {
             // 如果没有正文规则，直接返回章节 URL（可能就是内容本身）
-            return chapter.url
+            return chapter.chapterUrl
         }
         
         // 1. 请求正文页
         let analyzedUrl = AnalyzeUrl.analyze(
-            ruleUrl: chapter.url,
+            ruleUrl: chapter.chapterUrl,
             baseUrl: source.bookSourceUrl,
             source: source
         )
