@@ -219,5 +219,5 @@ struct ReaderPageView: View {
 }
 
 #Preview {
-    ReaderView(book: Book.fetchRequest().first ?? Book())
+    Text("ReaderView Preview")
 }

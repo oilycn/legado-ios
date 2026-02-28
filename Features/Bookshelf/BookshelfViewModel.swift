@@ -118,7 +118,7 @@ final class BookshelfViewModel: ObservableObject {
     }
     
     func updateGroup(for book: Book, group: Int32) {
-        book.group = group
+        book.group = Int64(group)
         try? CoreDataStack.shared.save()
     }
 }

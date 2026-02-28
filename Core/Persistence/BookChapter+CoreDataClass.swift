@@ -105,6 +105,8 @@ extension BookChapter {
 // MARK: - 比较
 extension BookChapter {
     func compare(byIndex other: BookChapter) -> ComparisonResult {
-        return index.compare(other.index)
+        if index < other.index { return .orderedAscending }
+        if index > other.index { return .orderedDescending }
+        return .orderedSame
     }
 }

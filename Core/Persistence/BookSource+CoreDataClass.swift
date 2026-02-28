@@ -119,7 +119,7 @@ extension BookSource {
     
     /// 书籍信息规则
     struct BookInfoRule: Codable {
-        var init: String?
+        var `init`: String?
         var name: String?
         var author: String?
         var intro: String?

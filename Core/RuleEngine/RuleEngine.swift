@@ -14,7 +14,7 @@ import Kanna
 enum RuleResult {
     case string(String)
     case list([String])
-    case nil
+    case none
     
     var string: String? {
         if case .string(let value) = self { return value }
@@ -34,7 +34,7 @@ class ExecutionContext {
     var jsonDict: [String: Any]?
     var baseURL: URL?
     var variables: [String: String] = [:]
-    var lastResult: RuleResult = .nil
+    var lastResult: RuleResult = .none
     
     lazy var jsContext: JSContext = {
         let context = JSContext()!
@@ -89,7 +89,7 @@ class RuleEngine {
         rules: [String],
         context: ExecutionContext
     ) throws -> RuleResult {
-        var lastResult: RuleResult = .nil
+        var lastResult: RuleResult = .none
         
         for rule in rules {
             guard let executor = executors.first(where: { $0.canExecute(rule) }) else {
@@ -150,7 +150,7 @@ class CSSParser: RuleExecutor {
             }
         }
         
-        return .nil
+        return .none
     }
     
     private func parseSelector(_ rule: String) -> (String, String) {
@@ -179,9 +179,7 @@ class XPathParser: RuleExecutor {
             throw RuleError.noDocument
         }
         
-        guard let doc = Kanna.HTML(html: html, encoding: .utf8) else {
-            throw RuleError.invalidRule("HTML 解析失败")
-        }
+        let doc = try Kanna.HTML(html: html, encoding: .utf8)
         
         var results: [String] = []
         for node in doc.xpath(rule) {
@@ -196,7 +194,7 @@ class XPathParser: RuleExecutor {
             return .list(results)
         }
         
-        return .nil
+        return .none
     }
 }
 
@@ -227,7 +225,7 @@ class JSONPathParser: RuleExecutor {
             return .list(strings)
         }
         
-        return .nil
+        return .none
     }
     
     private func evaluateJSONPath(_ path: String, json: [String: Any]) -> Any? {
@@ -288,7 +286,7 @@ class RegexParser: RuleExecutor {
             return .list(results)
         }
         
-        return .nil
+        return .none
     }
 }
 
@@ -312,7 +310,7 @@ class JavaScriptParser: RuleExecutor {
             return .string(string)
         }
         
-        return .nil
+        return .none
     }
     
     private func extractJS(_ rule: String) -> String {

@@ -148,7 +148,7 @@ struct AboutView: View {
                     Divider()
                     
                     // 简介
-                    SectionCard(title: "应用简介") {
+                    AboutSectionCard(title: "应用简介") {
                         Text("""
                         Legado iOS 是基于 Android 版 Legado（开源阅读）开发的 iOS 原生阅读应用。
                         
@@ -157,7 +157,7 @@ struct AboutView: View {
                     }
                     
                     // 特性
-                    SectionCard(title: "主要特性") {
+                    AboutSectionCard(title: "主要特性") {
                         VStack(alignment: .leading, spacing: 8) {
                             FeatureRow(icon: "square.grid.2x2", text: "自定义书源规则")
                             FeatureRow(icon: "magnifyingglass", text: "多书源聚合搜索")
@@ -168,7 +168,7 @@ struct AboutView: View {
                     }
                     
                     // 技术栈
-                    SectionCard(title: "技术栈") {
+                    AboutSectionCard(title: "技术栈") {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("• Swift 5.10+")
                             Text("• SwiftUI")
@@ -180,7 +180,7 @@ struct AboutView: View {
                     }
                     
                     // 链接
-                    SectionCard(title: "相关链接") {
+                    AboutSectionCard(title: "相关链接") {
                         VStack(alignment: .leading, spacing: 8) {
                             Link("GitHub 仓库", destination: URL(string: "https://github.com/chrn11/legado-ios")!)
                                 .foregroundColor(.blue)
@@ -194,13 +194,13 @@ struct AboutView: View {
                     }
                     
                     // 开源协议
-                    SectionCard(title: "开源协议") {
+                    AboutSectionCard(title: "开源协议") {
                         Text("本项目遵循 GPL-3.0 协议。")
                             .font(.caption)
                     }
                     
                     // 免责声明
-                    SectionCard(title: "免责声明") {
+                    AboutSectionCard(title: "免责声明") {
                         Text("""
                         本应用仅供学习交流使用，请勿用于商业目的。
                         
@@ -244,7 +244,7 @@ struct FeatureRow: View {
     }
 }
 
-struct SectionCard<Content: View>: View {
+struct AboutSectionCard<Content: View>: View {
     let title: String
     @ViewBuilder let content: Content
     

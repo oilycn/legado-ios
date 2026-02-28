@@ -167,9 +167,13 @@ class LocalBookViewModel: ObservableObject {
             return .utf16BigEndian
         }
         
-        // 尝试 GBK/GB2312 (中文常见)
-        if let _ = String(data: data, encoding: .gb18030) {
-            return .gb18030
+        let gb18030 = String.Encoding(
+            rawValue: CFStringConvertEncodingToNSStringEncoding(
+                CFStringEncoding(CFStringEncodings.GB_18030_2000.rawValue)
+            )
+        )
+        if String(data: data, encoding: gb18030) != nil {
+            return gb18030
         }
         
         // 默认 UTF-8
@@ -296,7 +300,8 @@ struct LocalBookView: View {
                         imageName: "book.closed"
                     )
                 } else {
-                    List(viewModel.localBooks) { book in
+                    List {
+                        ForEach(viewModel.localBooks, id: \.bookId) { book in
                         HStack {
                             BookCoverView(url: book.coverUrl)
                                 .frame(width: 50, height: 70)
@@ -319,11 +324,12 @@ struct LocalBookView: View {
                             
                             Spacer()
                         }
-                        .swipeActions {
-                            Button(role: .destructive) {
-                                viewModel.deleteBook(book)
-                            } label: {
-                                Label("删除", systemImage: "trash")
+                            .swipeActions {
+                                Button(role: .destructive) {
+                                    viewModel.deleteBook(book)
+                                } label: {
+                                    Label("删除", systemImage: "trash")
+                                }
                             }
                         }
                     }
