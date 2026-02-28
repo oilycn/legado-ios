@@ -86,6 +86,16 @@ struct SourceManageView: View {
             .task {
                 await viewModel.loadSources()
             }
+            .alert("操作失败", isPresented: Binding(
+                get: { viewModel.errorMessage != nil },
+                set: { if !$0 { viewModel.errorMessage = nil } }
+            )) {
+                Button("确定", role: .cancel) {
+                    viewModel.errorMessage = nil
+                }
+            } message: {
+                Text(viewModel.errorMessage ?? "未知错误")
+            }
         }
     }
 }
@@ -225,33 +235,54 @@ struct SourceEditView: View {
                        let json = String(data: data, encoding: .utf8) {
                         ruleContent = json
                     }
+                    
+                    if let data = source.ruleBookInfoData,
+                       let json = String(data: data, encoding: .utf8) {
+                        ruleBookInfo = json
+                    }
+                    
+                    if let data = source.ruleTocData,
+                       let json = String(data: data, encoding: .utf8) {
+                        ruleToc = json
+                    }
                 }
             }
         }
     }
     
     private func save() {
+        let saved: Bool
         if let source = source {
-            viewModel.updateSource(
+            saved = viewModel.updateSource(
                 source,
                 name: name,
                 url: url,
                 group: group,
                 type: Int32(type),
                 searchUrl: searchUrl,
-                exploreUrl: exploreUrl
+                exploreUrl: exploreUrl,
+                ruleSearch: ruleSearch,
+                ruleBookInfo: ruleBookInfo,
+                ruleToc: ruleToc,
+                ruleContent: ruleContent
             )
         } else {
-            viewModel.createSource(
+            saved = viewModel.createSource(
                 name: name,
                 url: url,
                 group: group,
                 type: Int32(type),
                 searchUrl: searchUrl,
-                exploreUrl: exploreUrl
+                exploreUrl: exploreUrl,
+                ruleSearch: ruleSearch,
+                ruleBookInfo: ruleBookInfo,
+                ruleToc: ruleToc,
+                ruleContent: ruleContent
             )
         }
-        dismiss()
+        if saved {
+            dismiss()
+        }
     }
 }
 
@@ -273,8 +304,9 @@ struct SourceImportView: View {
                     
                     Button(action: {
                         Task {
-                            await viewModel.importFromURL(importURL)
-                            dismiss()
+                            if await viewModel.importFromURL(importURL) {
+                                dismiss()
+                            }
                         }
                     }) {
                         Text("导入")
@@ -288,8 +320,9 @@ struct SourceImportView: View {
                         .font(.system(.caption, design: .monospaced))
                     
                     Button(action: {
-                        viewModel.importFromText(importText)
-                        dismiss()
+                        if viewModel.importFromText(importText) {
+                            dismiss()
+                        }
                     }) {
                         Text("导入")
                     }

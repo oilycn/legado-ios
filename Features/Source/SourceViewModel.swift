@@ -17,6 +17,7 @@ class SourceViewModel: ObservableObject {
         do {
             let request: NSFetchRequest<BookSource> = BookSource.fetchRequest()
             request.sortDescriptors = [NSSortDescriptor(key: "customOrder", ascending: true)]
+            request.includesPendingChanges = false
             
             sources = try CoreDataStack.shared.viewContext.fetch(request)
         } catch {
@@ -30,8 +31,12 @@ class SourceViewModel: ObservableObject {
         group: String,
         type: Int32,
         searchUrl: String,
-        exploreUrl: String
-    ) {
+        exploreUrl: String,
+        ruleSearch: String,
+        ruleBookInfo: String,
+        ruleToc: String,
+        ruleContent: String
+    ) -> Bool {
         let context = CoreDataStack.shared.viewContext
         let source = BookSource.create(in: context)
         
@@ -41,10 +46,26 @@ class SourceViewModel: ObservableObject {
         source.bookSourceType = type
         source.searchUrl = searchUrl.isEmpty ? nil : searchUrl
         source.exploreUrl = exploreUrl.isEmpty ? nil : exploreUrl
+        do {
+            source.ruleSearchData = try encodeRuleJSON(from: ruleSearch)
+            source.ruleBookInfoData = try encodeRuleJSON(from: ruleBookInfo)
+            source.ruleTocData = try encodeRuleJSON(from: ruleToc)
+            source.ruleContentData = try encodeRuleJSON(from: ruleContent)
+        } catch {
+            context.rollback()
+            errorMessage = "保存失败：\(error.localizedDescription)"
+            return false
+        }
         
-        try? CoreDataStack.shared.save()
-        Task {
-            await loadSources()
+        do {
+            try CoreDataStack.shared.save()
+            Task { await loadSources() }
+            return true
+        } catch {
+            context.rollback()
+            errorMessage = "保存失败：\(error.localizedDescription)"
+            Task { await loadSources() }
+            return false
         }
     }
     
@@ -55,94 +76,174 @@ class SourceViewModel: ObservableObject {
         group: String,
         type: Int32,
         searchUrl: String,
-        exploreUrl: String
-    ) {
+        exploreUrl: String,
+        ruleSearch: String,
+        ruleBookInfo: String,
+        ruleToc: String,
+        ruleContent: String
+    ) -> Bool {
+        let context = CoreDataStack.shared.viewContext
         source.bookSourceName = name
         source.bookSourceUrl = url
         source.bookSourceGroup = group.isEmpty ? nil : group
         source.bookSourceType = type
         source.searchUrl = searchUrl.isEmpty ? nil : searchUrl
         source.exploreUrl = exploreUrl.isEmpty ? nil : exploreUrl
+        do {
+            source.ruleSearchData = try encodeRuleJSON(from: ruleSearch)
+            source.ruleBookInfoData = try encodeRuleJSON(from: ruleBookInfo)
+            source.ruleTocData = try encodeRuleJSON(from: ruleToc)
+            source.ruleContentData = try encodeRuleJSON(from: ruleContent)
+        } catch {
+            context.rollback()
+            errorMessage = "保存失败：\(error.localizedDescription)"
+            return false
+        }
         
-        try? CoreDataStack.shared.save()
-        Task {
-            await loadSources()
+        do {
+            try CoreDataStack.shared.save()
+            Task { await loadSources() }
+            return true
+        } catch {
+            context.rollback()
+            errorMessage = "保存失败：\(error.localizedDescription)"
+            Task { await loadSources() }
+            return false
         }
     }
     
     func deleteSource(_ source: BookSource) {
-        CoreDataStack.shared.viewContext.delete(source)
-        try? CoreDataStack.shared.save()
+        let context = CoreDataStack.shared.viewContext
+        context.delete(source)
+        do {
+            try CoreDataStack.shared.save()
+        } catch {
+            context.rollback()
+            errorMessage = "删除失败：\(error.localizedDescription)"
+        }
         Task {
             await loadSources()
         }
     }
     
     func deleteSources(at indexSet: IndexSet) {
+        let context = CoreDataStack.shared.viewContext
         for index in indexSet {
-            CoreDataStack.shared.viewContext.delete(sources[index])
+            context.delete(sources[index])
         }
-        try? CoreDataStack.shared.save()
+        do {
+            try CoreDataStack.shared.save()
+        } catch {
+            context.rollback()
+            errorMessage = "删除失败：\(error.localizedDescription)"
+        }
         Task {
             await loadSources()
         }
     }
     
-    func importFromURL(_ urlString: String) async {
+    func importFromURL(_ urlString: String) async -> Bool {
         guard let url = URL(string: urlString) else {
             errorMessage = "无效的 URL"
-            return
+            return false
         }
         
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
             if let json = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
-                importFromJSON(json)
+                return importFromJSON(json)
             }
+            if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                return importSingleSource(json)
+            }
+            errorMessage = "导入失败：不支持的 JSON 格式"
+            return false
         } catch {
             errorMessage = "导入失败：\(error.localizedDescription)"
+            return false
         }
     }
     
-    func importFromText(_ text: String) {
+    func importFromText(_ text: String) -> Bool {
         guard let data = text.data(using: .utf8) else {
             errorMessage = "无效的文本"
-            return
+            return false
         }
         
         do {
             if let json = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
-                importFromJSON(json)
+                return importFromJSON(json)
             } else if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                importSingleSource(json)
+                return importSingleSource(json)
             }
+            errorMessage = "导入失败：不支持的 JSON 格式"
+            return false
         } catch {
             errorMessage = "解析 JSON 失败：\(error.localizedDescription)"
+            return false
         }
     }
     
-    private func importFromJSON(_ sources: [[String: Any]]) {
+    private func importFromJSON(_ sources: [[String: Any]]) -> Bool {
         let context = CoreDataStack.shared.viewContext
         
         for sourceData in sources {
-            let source = BookSource.create(in: context)
+            let source = findOrCreateSource(for: sourceData, in: context)
             applySourceData(source, sourceData)
         }
         
-        try? CoreDataStack.shared.save()
-        Task {
-            await loadSources()
+        do {
+            try CoreDataStack.shared.save()
+            Task { await loadSources() }
+            return true
+        } catch {
+            context.rollback()
+            errorMessage = "导入失败：\(error.localizedDescription)"
+            Task { await loadSources() }
+            return false
         }
     }
     
-    private func importSingleSource(_ sourceData: [String: Any]) {
+    private func importSingleSource(_ sourceData: [String: Any]) -> Bool {
         let context = CoreDataStack.shared.viewContext
-        let source = BookSource.create(in: context)
+        let source = findOrCreateSource(for: sourceData, in: context)
         applySourceData(source, sourceData)
-        try? CoreDataStack.shared.save()
-        Task {
-            await loadSources()
+
+        do {
+            try CoreDataStack.shared.save()
+            Task { await loadSources() }
+            return true
+        } catch {
+            context.rollback()
+            errorMessage = "导入失败：\(error.localizedDescription)"
+            Task { await loadSources() }
+            return false
         }
+    }
+
+    private func findOrCreateSource(for data: [String: Any], in context: NSManagedObjectContext) -> BookSource {
+        let url = data["bookSourceUrl"] as? String ?? ""
+        if !url.isEmpty {
+            let request: NSFetchRequest<BookSource> = BookSource.fetchRequest()
+            request.fetchLimit = 1
+            request.predicate = NSPredicate(format: "bookSourceUrl == %@", url)
+            if let existing = try? context.fetch(request).first {
+                return existing
+            }
+        }
+        return BookSource.create(in: context)
+    }
+
+    private func encodeRuleJSON(from text: String) throws -> Data? {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty {
+            return nil
+        }
+        guard let data = trimmed.data(using: .utf8) else {
+            throw SourceValidationError.invalidEncoding
+        }
+        let jsonObject = try JSONSerialization.jsonObject(with: data)
+        return try JSONSerialization.data(withJSONObject: jsonObject)
     }
     
     private func applySourceData(_ source: BookSource, _ data: [String: Any]) {
@@ -199,5 +300,16 @@ class SourceViewModel: ObservableObject {
         
         // TODO: 导出为文件
         print("导出 \(sources.count) 个书源")
+    }
+}
+
+private enum SourceValidationError: LocalizedError {
+    case invalidEncoding
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidEncoding:
+            return "规则内容编码无效"
+        }
     }
 }

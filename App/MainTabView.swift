@@ -15,37 +15,30 @@ struct MainTabView: View {
             // 书架
             BookshelfView()
                 .tabItem {
-                    Label("书架", systemImage: "books.vertical")
+                    Label("书架", systemImage: "books.vertical.fill")
                 }
                 .tag(0)
             
             // 发现
             SearchResultView()
                 .tabItem {
-                    Label("发现", systemImage: "compass")
+                    Label("发现", systemImage: "safari")
                 }
                 .tag(1)
-            
-            // 书源
-            SourceManageView()
-                .tabItem {
-                    Label("书源", systemImage: "square.grid.2x2")
-                }
-                .tag(2)
             
             // 本地
             LocalBookView()
                 .tabItem {
-                    Label("本地", systemImage: "folder")
+                    Label("本地", systemImage: "folder.fill")
                 }
-                .tag(3)
+                .tag(2)
             
             // 我的
             SettingsView()
                 .tabItem {
-                    Label("我的", systemImage: "person")
+                    Label("我的", systemImage: "person.crop.circle")
                 }
-                .tag(4)
+                .tag(3)
         }
         .accentColor(.blue)
     }
