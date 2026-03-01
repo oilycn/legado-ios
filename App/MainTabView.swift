@@ -33,12 +33,19 @@ struct MainTabView: View {
                 }
                 .tag(2)
             
+            // 订阅
+            RSSSubscriptionView()
+                .tabItem {
+                    Label("订阅", systemImage: "antenna.radiowaves.left.and.right")
+                }
+                .tag(3)
+            
             // 我的
             SettingsView()
                 .tabItem {
                     Label("我的", systemImage: "person.crop.circle")
                 }
-                .tag(3)
+                .tag(4)
         }
         .accentColor(.blue)
     }
@@ -49,6 +56,7 @@ struct SettingsView: View {
     @State private var showingReplaceRules = false
     @State private var showingAbout = false
     @State private var showingBackup = false
+    @State private var showingQRScanner = false
     
     var body: some View {
         NavigationView {
@@ -71,7 +79,11 @@ struct SettingsView: View {
                 // 数据管理
                 Section(header: Label("数据", systemImage: "database")) {
                     NavigationLink("备份与恢复") {
-                        Text("备份恢复功能待实现")
+                        BackupRestoreView()
+                    }
+                    
+                    NavigationLink("词典规则") {
+                        DictRuleView()
                     }
                     
                     NavigationLink("清理缓存") {
@@ -85,8 +97,13 @@ struct SettingsView: View {
                         SourceManageView()
                     }
                     
-                    NavigationLink("订阅源") {
-                        Text("订阅源功能待实现")
+                    Button(action: { showingQRScanner = true }) {
+                        HStack {
+                            Text("扫码导入书源")
+                            Spacer()
+                            Image(systemName: "qrcode.viewfinder")
+                                .foregroundColor(.secondary)
+                        }
                     }
                 }
                 
@@ -112,6 +129,9 @@ struct SettingsView: View {
             .navigationTitle("我的")
             .sheet(isPresented: $showingAbout) {
                 AboutView()
+            }
+            .sheet(isPresented: $showingQRScanner) {
+                QRCodeScanView()
             }
         }
     }

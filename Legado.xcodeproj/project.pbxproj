@@ -49,6 +49,9 @@
 		1A0000000000003D /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 1AC0000000000003 /* ZIPFoundation */; };
 		1A00000000000040 /* AnalyzeUrl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000040 /* AnalyzeUrl.swift */; };
 		1A00000000000041 /* WebBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000041 /* WebBook.swift */; };
+		1A00000000000042 /* RSSSubscriptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000042 /* RSSSubscriptionView.swift */; };
+		1A00000000000043 /* QRCodeScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000043 /* QRCodeScanView.swift */; };
+		1A00000000000044 /* DictRuleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000044 /* DictRuleView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -93,6 +96,9 @@
 		1A1000000000003A /* ReplaceRuleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplaceRuleView.swift; sourceTree = "<group>"; };
 		1A10000000000040 /* AnalyzeUrl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyzeUrl.swift; sourceTree = "<group>"; };
 		1A10000000000041 /* WebBook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebBook.swift; sourceTree = "<group>"; };
+		1A10000000000042 /* RSSSubscriptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RSSSubscriptionView.swift; sourceTree = "<group>"; };
+		1A10000000000043 /* QRCodeScanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeScanView.swift; sourceTree = "<group>"; };
+		1A10000000000044 /* DictRuleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictRuleView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -219,6 +225,7 @@
 				1A30000000000025 /* Config */,
 				1A30000000000027 /* Local */,
 				1A30000000000026 /* BookDetail */,
+				1A30000000000028 /* RSS */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -258,6 +265,7 @@
 			children = (
 				1A10000000000026 /* SourceManageView.swift */,
 				1A10000000000027 /* SourceViewModel.swift */,
+				1A10000000000043 /* QRCodeScanView.swift */,
 			);
 			path = Source;
 			sourceTree = "<group>";
@@ -268,8 +276,17 @@
 				1A10000000000038 /* BackupRestoreView.swift */,
 				1A1000000000003A /* ReplaceRuleView.swift */,
 				1A10000000000028 /* SettingsView.swift */,
+				1A10000000000044 /* DictRuleView.swift */,
 			);
 			path = Config;
+			sourceTree = "<group>";
+		};
+		1A30000000000028 /* RSS */ = {
+			isa = PBXGroup;
+			children = (
+				1A10000000000042 /* RSSSubscriptionView.swift */,
+			);
+			path = RSS;
 			sourceTree = "<group>";
 		};
 		1A30000000000027 /* Local */ = {
@@ -418,6 +435,9 @@
 				1A00000000000029 /* BookDetailView.swift in Sources */,
 				1A00000000000040 /* AnalyzeUrl.swift in Sources */,
 				1A00000000000041 /* WebBook.swift in Sources */,
+				1A00000000000042 /* RSSSubscriptionView.swift in Sources */,
+				1A00000000000043 /* QRCodeScanView.swift in Sources */,
+				1A00000000000044 /* DictRuleView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
