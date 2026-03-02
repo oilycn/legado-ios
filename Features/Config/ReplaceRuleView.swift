@@ -250,6 +250,10 @@ struct ReplaceRuleEditView: View {
     let rule: ReplaceRuleItem?
     @Environment(\.dismiss) var dismiss
 struct ReplaceRuleEditView: View {
+    var viewModel: ReplaceRuleViewModel
+    let rule: ReplaceRuleItem?
+    @Environment(\.dismiss) var dismiss
+struct ReplaceRuleEditView: View {
     @ObservedObject var viewModel: ReplaceRuleViewModel
     let rule: ReplaceRuleItem?
     @Environment(\.dismiss) var dismiss
