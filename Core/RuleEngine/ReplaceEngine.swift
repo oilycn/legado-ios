@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreData
 
 class ReplaceEngine {
     static let shared = ReplaceEngine()

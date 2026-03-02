@@ -17,6 +17,18 @@ struct BookshelfView: View {
         Group {
             if viewModel.books.isEmpty && !viewModel.isLoading {
                 EmptyStateView(
+                    title: "书架空空如也",
+                    subtitle: "点击右上角添加书籍或导入书源",
+                    imageName: "books.vertical"
+                )
+            } else {
+                bookshelfContent
+            }
+        }
+        .navigationTitle("书架")
+        Group {
+            if viewModel.books.isEmpty && !viewModel.isLoading {
+                EmptyStateView(
                         title: "书架空空如也",
                         subtitle: "点击右上角添加书籍或导入书源",
                         imageName: "books.vertical"

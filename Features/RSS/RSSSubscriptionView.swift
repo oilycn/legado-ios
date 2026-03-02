@@ -405,7 +405,11 @@ struct RSSSubscriptionView: View {
                         viewModel.addSource(name: newSourceName, url: newSourceUrl)
                         newSourceName = ""
                         newSourceUrl = ""
-                        Task { await viewModel.refreshAll() }
+            }
+        }
+    }
+
+// MARK: - 错误类型
                     }
                 }
             }
