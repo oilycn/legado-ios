@@ -52,8 +52,6 @@
 		1A00000000000042 /* RSSSubscriptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000042 /* RSSSubscriptionView.swift */; };
 		1A00000000000043 /* QRCodeScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000043 /* QRCodeScanView.swift */; };
 		1A00000000000044 /* DictRuleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000044 /* DictRuleView.swift */; };
-		1A00000000000045 /* ReplaceRule+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000045 /* ReplaceRule+CoreDataClass.swift */; };
-		1A00000000000046 /* ReplaceRuleDebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000046 /* ReplaceRuleDebugView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -101,8 +99,6 @@
 		1A10000000000042 /* RSSSubscriptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RSSSubscriptionView.swift; sourceTree = "<group>"; };
 		1A10000000000043 /* QRCodeScanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeScanView.swift; sourceTree = "<group>"; };
 		1A10000000000044 /* DictRuleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictRuleView.swift; sourceTree = "<group>"; };
-		1A10000000000045 /* ReplaceRule+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ReplaceRule+CoreDataClass.swift"; sourceTree = "<group>"; };
-		1A10000000000046 /* ReplaceRuleDebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplaceRuleDebugView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -165,7 +161,7 @@
 				1A10000000000014 /* ReadConfig.swift */,
 				1A10000000000015 /* CoreDataStack.swift */,
 				1A10000000000031 /* CloudKitSyncManager.swift */,
-				1A10000000000045 /* ReplaceRule+CoreDataClass.swift */,
+			);
 			path = Persistence;
 			sourceTree = "<group>";
 		};
@@ -281,7 +277,7 @@
 				1A1000000000003A /* ReplaceRuleView.swift */,
 				1A10000000000028 /* SettingsView.swift */,
 				1A10000000000044 /* DictRuleView.swift */,
-				1A10000000000046 /* ReplaceRuleDebugView.swift */,
+			);
 			path = Config;
 			sourceTree = "<group>";
 		};
@@ -442,8 +438,7 @@
 				1A00000000000042 /* RSSSubscriptionView.swift in Sources */,
 				1A00000000000043 /* QRCodeScanView.swift in Sources */,
 				1A00000000000044 /* DictRuleView.swift in Sources */,
-				1A00000000000045 /* ReplaceRule+CoreDataClass.swift in Sources */,
-				1A00000000000046 /* ReplaceRuleDebugView.swift in Sources */,
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
