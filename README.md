@@ -105,6 +105,30 @@ xcodebuild -resolvePackageDependencies -scheme Legado
 - [x] 网络层
 - [x] 规则引擎 V1
 
+### M1 - 书源与搜索 (已完成 ✅)
+- [x] 书源管理界面
+- [x] 书源 CRUD
+- [x] 搜索功能
+- [x] 书籍详情
+
+### M2 - 阅读主链路 (已完成 ✅)
+- [x] 目录解析
+- [x] 阅读器
+- [x] 书架管理
+
+### M3 - 替换规则 (已完成 ✅)
+- [x] ReplaceEngine
+- [x] ReplaceRule CoreData 实体
+- [x] 规则调试工具
+
+### M4 - 本地书籍 (已完成 ✅)
+- [x] TXT 解析
+- [x] EPUB 支持
+- [x] 项目骨架
+- [x] CoreData Stack
+- [x] 网络层
+- [x] 规则引擎 V1
+
 ### M1 - 书源与搜索 (进行中 🚧)
 - [x] 书源管理界面
 - [x] 书源 CRUD
