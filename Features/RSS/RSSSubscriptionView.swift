@@ -401,21 +401,18 @@ struct RSSSubscriptionView: View {
                     .textInputAutocapitalization(.never)
                 Button("取消", role: .cancel) { }
                 Button("添加") {
-                    if !newSourceName.isEmpty && !newSourceUrl.isEmpty {
-                        viewModel.addSource(name: newSourceName, url: newSourceUrl)
-                        newSourceName = ""
-                        newSourceUrl = ""
-            }
-        }
-    }
-
-// MARK: - 错误类型
+                        Task { await viewModel.refreshAll() }
                     }
                 }
             }
         }
+        .task {
+            await viewModel.refreshAll()
+        }
     }
-    }
+}
+
+// MARK: - 错误类型
 
 // MARK: - 错误类型
 enum RSSError: LocalizedError {

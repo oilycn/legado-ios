@@ -373,16 +373,3 @@ struct LocalBookView: View {
         }
     }
 }
-
-#Preview {
-    LocalBookView()
-}
-                await viewModel.loadLocalBooks()
-            }
-        }
-    }
-    }
-
-#Preview {
-    LocalBookView()
-}
