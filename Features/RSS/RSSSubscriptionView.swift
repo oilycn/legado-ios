@@ -293,10 +293,9 @@ struct RSSSubscriptionView: View {
     @State private var newSourceUrl = ""
     
     var body: some View {
-        NavigationView {
-            List {
-                if viewModel.sources.isEmpty {
-                    VStack(spacing: 12) {
+        List {
+            if viewModel.sources.isEmpty {
+                VStack(spacing: 12) {
                         Image(systemName: "antenna.radiowaves.left.and.right")
                             .font(.system(size: 40))
                             .foregroundColor(.orange.opacity(0.6))
@@ -412,7 +411,7 @@ struct RSSSubscriptionView: View {
             }
         }
     }
-}
+    }
 
 // MARK: - 错误类型
 enum RSSError: LocalizedError {

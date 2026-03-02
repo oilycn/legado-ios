@@ -25,7 +25,7 @@ struct BackupRestoreView: View {
                     
                     Button(action: viewModel.backupAll) {
                         HStack {
-                            Image(systemName: "doc.badge.plus")
+                            Image(systemName: "doc")
                             Text("完整备份")
                         }
                     }
@@ -92,18 +92,15 @@ class BackupRestoreViewModel: ObservableObject {
         isBackingUp = true
         
         do {
-            // 导出所有数据为 JSON
-            let books = try CoreDataStack.shared.viewContext.fetch(Book.fetchRequest())
-            let sources = try CoreDataStack.shared.viewContext.fetch(BookSource.fetchRequest())
-            let rules = try CoreDataStack.shared.viewContext.fetch(ReplaceRule.fetchRequest())
-            
+            // ReplaceRule 使用 UserDefaults 存储，从 UserDefaults 获取
+            let rulesData = UserDefaults.standard.data(forKey: "replace_rules")
+            let rules = (try? JSONDecoder().decode([ReplaceRuleItem].self, from: rulesData ?? Data())) ?? []
             var dataDict: [String: Any] = [
                 "version": "1.0",
                 "timestamp": Date().timeIntervalSince1970,
                 "books": books.map { bookToDict($0) },
                 "sources": sources.map { sourceToDict($0) },
-                "rules": rules.map { ruleToDict($0) }
-            ]
+                "rules": rules.map { ruleItemToDict($0) }
             
             let jsonData = try JSONSerialization.data(withJSONObject: dataDict, options: .prettyPrinted)
             
@@ -135,8 +132,7 @@ class BackupRestoreViewModel: ObservableObject {
         let context = CoreDataStack.shared.viewContext
         
         // 删除所有实体
-        let entities = ["Book", "BookSource", "BookChapter", "Bookmark", "ReplaceRule"]
-        
+        let entities = ["Book", "BookSource", "BookChapter", "Bookmark"]
         for entityName in entities {
             let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: entityName)
             if let objects = try? context.fetch(fetchRequest) {
@@ -173,14 +169,16 @@ class BackupRestoreViewModel: ObservableObject {
         ]
     }
     
-    private func ruleToDict(_ rule: ReplaceRule) -> [String: Any] {
+    private func ruleItemToDict(_ rule: ReplaceRuleItem) -> [String: Any] {
         return [
             "name": rule.name,
             "pattern": rule.pattern,
-            "replacement": rule.replacement
+            "replacement": rule.replacement,
+            "isRegex": rule.isRegex,
+            "enabled": rule.enabled,
+            "scope": rule.scope
         ]
     }
-    
     private func saveExportFile(data: Data, filename: String) {
         // 保存到 Documents 目录
         let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]

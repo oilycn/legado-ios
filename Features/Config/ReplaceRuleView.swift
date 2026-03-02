@@ -152,6 +152,7 @@ struct ReplaceRuleView: View {
         }
         .listStyle(.insetGrouped)
         .navigationTitle("替换规则")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack {

@@ -43,8 +43,7 @@ struct ReaderSettingsFullView: View {
     }
     
     var body: some View {
-        NavigationView {
-            Form {
+        Form {
                 Section(header: Text("主题")) {
                     Picker("主题", selection: $theme) {
                         ForEach(ReaderThemeType.allCases) { theme in
@@ -112,6 +111,7 @@ struct ReaderSettingsFullView: View {
                 }
             }
             .navigationTitle("阅读设置")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("取消") {
@@ -126,7 +126,6 @@ struct ReaderSettingsFullView: View {
                     }
                 }
             }
-        }
     }
     
     private func resetToDefault() {
@@ -195,5 +194,7 @@ struct ReaderPreviewView: View {
 }
 
 #Preview {
-    ReaderSettingsFullView()
+    NavigationView {
+        ReaderSettingsFullView()
+    }
 }

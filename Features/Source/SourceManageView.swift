@@ -48,6 +48,7 @@ struct SourceManageView: View {
             }
             .listStyle(.insetGrouped)
             .navigationTitle("书源管理")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 12) {

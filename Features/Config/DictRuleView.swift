@@ -153,6 +153,7 @@ struct DictRuleView: View {
         }
         .listStyle(.insetGrouped)
         .navigationTitle("词典规则")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack {

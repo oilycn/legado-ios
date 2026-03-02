@@ -291,10 +291,9 @@ struct LocalBookView: View {
     @State private var showingFilePicker = false
     
     var body: some View {
-        NavigationView {
-            Group {
-                if viewModel.localBooks.isEmpty {
-                    EmptyStateView(
+        Group {
+            if viewModel.localBooks.isEmpty {
+                EmptyStateView(
                         title: "暂无本地书籍",
                         subtitle: "点击右上角导入 TXT 或 EPUB 文件",
                         imageName: "book.closed"
@@ -370,7 +369,7 @@ struct LocalBookView: View {
             }
         }
     }
-}
+    }
 
 #Preview {
     LocalBookView()

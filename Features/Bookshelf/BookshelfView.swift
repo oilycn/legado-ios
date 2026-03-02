@@ -14,10 +14,9 @@ struct BookshelfView: View {
     @State private var showingAddBook = false
     
     var body: some View {
-        NavigationView {
-            Group {
-                if viewModel.books.isEmpty && !viewModel.isLoading {
-                    EmptyStateView(
+        Group {
+            if viewModel.books.isEmpty && !viewModel.isLoading {
+                EmptyStateView(
                         title: "书架空空如也",
                         subtitle: "点击右上角添加书籍或导入书源",
                         imageName: "books.vertical"

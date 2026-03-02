@@ -36,7 +36,7 @@ struct MainTabView: View {
             // 订阅
             RSSSubscriptionView()
                 .tabItem {
-                    Label("订阅", systemImage: "antenna.radiowaves.left.and.right")
+                    Label("订阅", systemImage: "dot.radiowaves.left.and.right")
                 }
                 .tag(3)
             
@@ -59,10 +59,9 @@ struct SettingsView: View {
     @State private var showingQRScanner = false
     
     var body: some View {
-        NavigationView {
-            List {
-                // 阅读设置
-                Section(header: Label("阅读", systemImage: "book")) {
+        List {
+            // 阅读设置
+            Section(header: Label("阅读", systemImage: "book")) {
                     NavigationLink("阅读设置") {
                         ReaderSettingsFullView()
                     }
@@ -127,6 +126,7 @@ struct SettingsView: View {
             }
             .listStyle(.insetGrouped)
             .navigationTitle("我的")
+            .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showingAbout) {
                 AboutView()
             }
@@ -229,6 +229,7 @@ struct AboutView: View {
                 .padding()
             }
             .navigationTitle("关于")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("完成") {
@@ -331,6 +332,7 @@ struct ThemeSettingsView: View {
         }
         .listStyle(.insetGrouped)
         .navigationTitle("主题")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
@@ -362,14 +364,14 @@ struct CacheCleanView: View {
             Section {
                 Button(action: clearImageCache) {
                     HStack {
-                        Image(systemName: "photo.badge.minus")
+                        Image(systemName: "trash")
                         Text("清理图片缓存")
                     }
                 }
                 
                 Button(action: clearChapterCache) {
                     HStack {
-                        Image(systemName: "doc.badge.minus")
+                        Image(systemName: "trash")
                         Text("清理章节缓存")
                     }
                 }
@@ -384,6 +386,7 @@ struct CacheCleanView: View {
         }
         .listStyle(.insetGrouped)
         .navigationTitle("清理缓存")
+        .navigationBarTitleDisplayMode(.inline)
         .task { calculateCacheSize() }
         .alert("提示", isPresented: $showingAlert) {
             Button("确定", role: .cancel) {}

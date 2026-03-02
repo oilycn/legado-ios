@@ -12,40 +12,38 @@ struct SearchResultView: View {
     @State private var showingSourcePicker = false
     
     var body: some View {
-        NavigationView {
-            VStack {
-                if viewModel.isSearching {
-                    ProgressView("搜索中...")
-                        .padding()
-                } else if viewModel.searchResults.isEmpty {
-                    EmptyStateView(
-                        title: "搜索结果",
-                        subtitle: "输入关键词搜索书籍",
-                        imageName: "magnifyingglass"
-                    )
-                } else {
-                    List(viewModel.searchResults) { result in
-                        SearchResultItemView(result: result)
-                    }
+        VStack {
+            if viewModel.isSearching {
+                ProgressView("搜索中...")
+                    .padding()
+            } else if viewModel.searchResults.isEmpty {
+                EmptyStateView(
+                    title: "搜索结果",
+                    subtitle: "输入关键词搜索书籍",
+                    imageName: "magnifyingglass"
+                )
+            } else {
+                List(viewModel.searchResults) { result in
+                    SearchResultItemView(result: result)
                 }
             }
-            .navigationTitle("搜索")
-            .searchable(text: $viewModel.searchText, prompt: "搜索书籍")
-            .onSubmit(of: .search) {
-                Task {
-                    await viewModel.search(keyword: viewModel.searchText, sources: viewModel.selectedSources)
+        }
+        .navigationTitle("搜索")
+        .searchable(text: $viewModel.searchText, prompt: "搜索书籍")
+        .onSubmit(of: .search) {
+            Task {
+                await viewModel.search(keyword: viewModel.searchText, sources: viewModel.selectedSources)
+            }
+        }
+        .toolbar {
+            ToolbarItem {
+                Button(action: { showingSourcePicker = true }) {
+                    Label("书源", systemImage: "square.grid.2x2")
                 }
             }
-            .toolbar {
-                ToolbarItem {
-                    Button(action: { showingSourcePicker = true }) {
-                        Label("书源", systemImage: "square.grid.2x2")
-                    }
-                }
-            }
-            .sheet(isPresented: $showingSourcePicker) {
-                SourcePickerView(selectedSources: $viewModel.selectedSources)
-            }
+        }
+        .sheet(isPresented: $showingSourcePicker) {
+            SourcePickerView(selectedSources: $viewModel.selectedSources)
         }
     }
 }
