@@ -153,12 +153,12 @@
 		1A10000000000059 /* PageSplitter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Features/Reader/PageSplitter.swift"; sourceTree = "<group>"; };
 		1A1000000000005A /* CoverPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Features/Reader/PageViews/CoverPageView.swift"; sourceTree = "<group>"; };
 		1A1000000000005B /* SlidePageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Features/Reader/PageViews/SlidePageView.swift"; sourceTree = "<group>"; };
-		1A1000000000005C /* DiscoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Features/Discovery/DiscoveryView.swift"; sourceTree = "<group>"; };
-		1A1000000000005D /* ReadingStatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Features/Statistics/ReadingStatisticsView.swift"; sourceTree = "<group>"; };
-		1A1000000000005E /* ReadingStatisticsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Core/Statistics/ReadingStatisticsManager.swift"; sourceTree = "<group>"; };
-		1A1000000000005F /* SourceDebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Features/Source/SourceDebugView.swift"; sourceTree = "<group>"; };
-		1A10000000000060 /* SourceDebugViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Features/Source/SourceDebugViewModel.swift"; sourceTree = "<group>"; };
-		1A10000000000061 /* RuleDebugger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Core/RuleEngine/RuleDebugger.swift"; sourceTree = "<group>"; };
+		1A1000000000005C /* DiscoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Discovery/DiscoveryView.swift"; sourceTree = "<group>"; };
+		1A1000000000005D /* ReadingStatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Statistics/ReadingStatisticsView.swift"; sourceTree = "<group>"; };
+		1A1000000000005E /* ReadingStatisticsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Statistics/ReadingStatisticsManager.swift"; sourceTree = "<group>"; };
+		1A1000000000005F /* SourceDebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceDebugView.swift; sourceTree = "<group>"; };
+		1A10000000000060 /* SourceDebugViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceDebugViewModel.swift; sourceTree = "<group>"; };
+		1A10000000000061 /* RuleDebugger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuleDebugger.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
