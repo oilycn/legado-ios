@@ -120,7 +120,7 @@ extension BookSource {
     
     /// 书籍信息规则
     struct BookInfoRule: Codable {
-        private var initRule: String?
+        var initRule: String?
         var name: String?
         var author: String?
         var intro: String?
@@ -134,14 +134,6 @@ extension BookSource {
             case initRule = "init"
             case name, author, intro, coverUrl, tocUrl, lastChapter, wordCount, downloadUrls
         }
-        
-        var `init`: String? {
-            get { initRule }
-            set { initRule = newValue }
-        }
-        
-        func getInit() -> String? { initRule }
-        mutating func setInit(_ value: String?) { initRule = value }
     }
     
     /// 目录规则
