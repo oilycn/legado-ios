@@ -55,6 +55,17 @@
 		1A00000000000044 /* DictRuleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000044 /* DictRuleView.swift */; };
 		1A00000000000045 /* ReplaceRule+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000045 /* ReplaceRule+CoreDataClass.swift */; };
 		1A00000000000046 /* ReplaceRuleDebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000046 /* ReplaceRuleDebugView.swift */; };
+		1A00000000000047 /* TemplateEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000047 /* TemplateEngine.swift */; };
+		1A00000000000048 /* JSBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000048 /* JSBridge.swift */; };
+		1A00000000000049 /* SourceEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000049 /* SourceEditView.swift */; };
+		1A0000000000004A /* SourceEditViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1000000000004A /* SourceEditViewModel.swift */; };
+		1A0000000000004B /* RuleFieldEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1000000000004B /* RuleFieldEditor.swift */; };
+		1A0000000000004C /* BasicInfoSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1000000000004C /* BasicInfoSection.swift */; };
+		1A0000000000004D /* SearchRuleSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1000000000004D /* SearchRuleSection.swift */; };
+		1A0000000000004E /* ExploreRuleSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1000000000004E /* ExploreRuleSection.swift */; };
+		1A0000000000004F /* BookInfoRuleSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1000000000004F /* BookInfoRuleSection.swift */; };
+		1A00000000000050 /* TocRuleSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000050 /* TocRuleSection.swift */; };
+		1A00000000000051 /* ContentRuleSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000051 /* ContentRuleSection.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -105,6 +116,17 @@
 		1A10000000000044 /* DictRuleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictRuleView.swift; sourceTree = "<group>"; };
 		1A10000000000045 /* ReplaceRule+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ReplaceRule+CoreDataClass.swift"; sourceTree = "<group>"; };
 		1A10000000000046 /* ReplaceRuleDebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplaceRuleDebugView.swift; sourceTree = "<group>"; };
+		1A10000000000047 /* TemplateEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemplateEngine.swift; sourceTree = "<group>"; };
+		1A10000000000048 /* JSBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSBridge.swift; sourceTree = "<group>"; };
+		1A10000000000049 /* SourceEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceEditView.swift; sourceTree = "<group>"; };
+		1A1000000000004A /* SourceEditViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceEditViewModel.swift; sourceTree = "<group>"; };
+		1A1000000000004B /* RuleFieldEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuleFieldEditor.swift; sourceTree = "<group>"; };
+		1A1000000000004C /* BasicInfoSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasicInfoSection.swift; sourceTree = "<group>"; };
+		1A1000000000004D /* SearchRuleSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchRuleSection.swift; sourceTree = "<group>"; };
+		1A1000000000004E /* ExploreRuleSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreRuleSection.swift; sourceTree = "<group>"; };
+		1A1000000000004F /* BookInfoRuleSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookInfoRuleSection.swift; sourceTree = "<group>"; };
+		1A10000000000050 /* TocRuleSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TocRuleSection.swift; sourceTree = "<group>"; };
+		1A10000000000051 /* ContentRuleSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentRuleSection.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -219,6 +241,8 @@
 				1A10000000000017 /* RuleEngine.swift */,
 				1A10000000000018 /* ReplaceEngine.swift */,
 				1A10000000000019 /* RuleSplitter.swift */,
+				1A10000000000047 /* TemplateEngine.swift */,
+				1A10000000000048 /* JSBridge.swift */,
 			);
 			path = RuleEngine;
 			sourceTree = "<group>";
@@ -273,9 +297,26 @@
 			children = (
 				1A10000000000026 /* SourceManageView.swift */,
 				1A10000000000027 /* SourceViewModel.swift */,
+				1A10000000000049 /* SourceEditView.swift */,
+				1A1000000000004A /* SourceEditViewModel.swift */,
+				1A30000000000029 /* Components */,
 				1A10000000000043 /* QRCodeScanView.swift */,
 			);
 			path = Source;
+			sourceTree = "<group>";
+		};
+		1A30000000000029 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				1A1000000000004B /* RuleFieldEditor.swift */,
+				1A1000000000004C /* BasicInfoSection.swift */,
+				1A1000000000004D /* SearchRuleSection.swift */,
+				1A1000000000004E /* ExploreRuleSection.swift */,
+				1A1000000000004F /* BookInfoRuleSection.swift */,
+				1A10000000000050 /* TocRuleSection.swift */,
+				1A10000000000051 /* ContentRuleSection.swift */,
+			);
+			path = Components;
 			sourceTree = "<group>";
 		};
 		1A30000000000025 /* Config */ = {
@@ -427,6 +468,8 @@
 				1A00000000000017 /* RuleEngine.swift in Sources */,
 				1A00000000000018 /* ReplaceEngine.swift in Sources */,
 				1A00000000000019 /* RuleSplitter.swift in Sources */,
+				1A00000000000047 /* TemplateEngine.swift in Sources */,
+				1A00000000000048 /* JSBridge.swift in Sources */,
 				1A00000000000036 /* AddBookView.swift in Sources */,
 				1A00000000000020 /* BookshelfView.swift in Sources */,
 				1A00000000000021 /* BookshelfViewModel.swift in Sources */,
@@ -438,6 +481,15 @@
 				1A00000000000025 /* SearchViewModel.swift in Sources */,
 				1A00000000000026 /* SourceManageView.swift in Sources */,
 				1A00000000000027 /* SourceViewModel.swift in Sources */,
+				1A00000000000049 /* SourceEditView.swift in Sources */,
+				1A0000000000004A /* SourceEditViewModel.swift in Sources */,
+				1A0000000000004B /* RuleFieldEditor.swift in Sources */,
+				1A0000000000004C /* BasicInfoSection.swift in Sources */,
+				1A0000000000004D /* SearchRuleSection.swift in Sources */,
+				1A0000000000004E /* ExploreRuleSection.swift in Sources */,
+				1A0000000000004F /* BookInfoRuleSection.swift in Sources */,
+				1A00000000000050 /* TocRuleSection.swift in Sources */,
+				1A00000000000051 /* ContentRuleSection.swift in Sources */,
 				1A00000000000038 /* BackupRestoreView.swift in Sources */,
 				1A0000000000003A /* ReplaceRuleView.swift in Sources */,
 				1A00000000000028 /* SettingsView.swift in Sources */,

@@ -12,7 +12,7 @@ struct SourceManageView: View {
     @StateObject private var viewModel = SourceViewModel()
     @State private var showingEdit = false
     @State private var showingImport = false
-    @State private var selectedSource: BookSource?
+    @State private var editViewModel: SourceEditViewModel?
     
     var body: some View {
             List {
@@ -33,7 +33,7 @@ struct SourceManageView: View {
                                 }
                                 
                                 Button {
-                                    selectedSource = source
+                                    editViewModel = SourceEditViewModel(source: source)
                                     showingEdit = true
                                 } label: {
                                     Label("编辑", systemImage: "pencil")
@@ -63,9 +63,9 @@ struct SourceManageView: View {
                         } label: {
                             Image(systemName: "ellipsis")
                         }
-                        
+
                         Button(action: {
-                            selectedSource = nil
+                            editViewModel = SourceEditViewModel()
                             showingEdit = true
                         }) {
                             Image(systemName: "plus")
@@ -73,11 +73,14 @@ struct SourceManageView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showingEdit) {
-                if let source = selectedSource {
-                    SourceEditView(source: source, viewModel: viewModel)
-                } else {
-                    SourceEditView(source: nil, viewModel: viewModel)
+            .sheet(isPresented: $showingEdit, onDismiss: {
+                editViewModel = nil
+                Task {
+                    await viewModel.loadSources()
+                }
+            }) {
+                if let editViewModel {
+                    SourceEditView(viewModel: editViewModel)
                 }
             }
             .sheet(isPresented: $showingImport) {
@@ -149,139 +152,6 @@ struct SourceItemView: View {
             }
         }
         .padding(.vertical, 4)
-    }
-}
-
-// MARK: - 书源编辑界面
-struct SourceEditView: View {
-    let source: BookSource?
-    @ObservedObject var viewModel: SourceViewModel
-    @Environment(\.dismiss) var dismiss
-    
-    @State private var name = ""
-    @State private var url = ""
-    @State private var group = ""
-    @State private var type = 0
-    @State private var searchUrl = ""
-    @State private var exploreUrl = ""
-    @State private var ruleSearch = ""
-    @State private var ruleBookInfo = ""
-    @State private var ruleToc = ""
-    @State private var ruleContent = ""
-    
-    var body: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("基础信息")) {
-                    TextField("书源名称", text: $name)
-                    TextField("书源 URL", text: $url)
-                    TextField("分组", text: $group)
-                    
-                    Picker("类型", selection: $type) {
-                        Text("文本").tag(0)
-                        Text("音频").tag(1)
-                        Text("图片").tag(2)
-                    }
-                }
-                
-                Section(header: Text("搜索与发现")) {
-                    TextField("搜索 URL", text: $searchUrl)
-                    TextField("发现 URL", text: $exploreUrl)
-                }
-                
-                Section(header: Text("规则（JSON 格式）")) {
-                    TextEditor(text: $ruleSearch)
-                        .frame(minHeight: 80)
-                        .font(.system(.caption, design: .monospaced))
-                    
-                    TextField("书籍信息规则", text: $ruleBookInfo)
-                    TextField("目录规则", text: $ruleToc)
-                    TextEditor(text: $ruleContent)
-                        .frame(minHeight: 80)
-                        .font(.system(.caption, design: .monospaced))
-                }
-            }
-            .navigationTitle(source == nil ? "新书源" : "编辑书源")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("取消") {
-                        dismiss()
-                    }
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("保存") {
-                        save()
-                    }
-                    .disabled(name.isEmpty || url.isEmpty)
-                }
-            }
-            .onAppear {
-                if let source = source {
-                    name = source.bookSourceName
-                    url = source.bookSourceUrl
-                    group = source.bookSourceGroup ?? ""
-                    type = Int(source.bookSourceType)
-                    searchUrl = source.searchUrl ?? ""
-                    exploreUrl = source.exploreUrl ?? ""
-                    
-                    if let data = source.ruleSearchData,
-                       let json = String(data: data, encoding: .utf8) {
-                        ruleSearch = json
-                    }
-                    
-                    if let data = source.ruleContentData,
-                       let json = String(data: data, encoding: .utf8) {
-                        ruleContent = json
-                    }
-                    
-                    if let data = source.ruleBookInfoData,
-                       let json = String(data: data, encoding: .utf8) {
-                        ruleBookInfo = json
-                    }
-                    
-                    if let data = source.ruleTocData,
-                       let json = String(data: data, encoding: .utf8) {
-                        ruleToc = json
-                    }
-                }
-            }
-        }
-    }
-    
-    private func save() {
-        let saved: Bool
-        if let source = source {
-            saved = viewModel.updateSource(
-                source,
-                name: name,
-                url: url,
-                group: group,
-                type: Int32(type),
-                searchUrl: searchUrl,
-                exploreUrl: exploreUrl,
-                ruleSearch: ruleSearch,
-                ruleBookInfo: ruleBookInfo,
-                ruleToc: ruleToc,
-                ruleContent: ruleContent
-            )
-        } else {
-            saved = viewModel.createSource(
-                name: name,
-                url: url,
-                group: group,
-                type: Int32(type),
-                searchUrl: searchUrl,
-                exploreUrl: exploreUrl,
-                ruleSearch: ruleSearch,
-                ruleBookInfo: ruleBookInfo,
-                ruleToc: ruleToc,
-                ruleContent: ruleContent
-            )
-        }
-        if saved {
-            dismiss()
-        }
     }
 }
 

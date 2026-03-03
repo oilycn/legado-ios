@@ -44,11 +44,16 @@ class ExecutionContext {
     var jsonString: String?
     var jsonDict: [String: Any]?
     var baseURL: URL?
+    var source: BookSource?
     var variables: [String: String] = [:]
     var lastResult: RuleResult = .none
     
     lazy var jsContext: JSContext = {
         let context = JSContext()!
+
+        let bridge = JSBridge()
+        bridge.context = self
+        bridge.inject(into: context)
         
         // 注入getVar/setVar
         context.setValue({ [weak self] (key: String) -> String in
@@ -126,6 +131,18 @@ class RuleEngine {
     private func executeWithSplit(_ rule: String, context: ExecutionContext) throws -> RuleResult {
         let trimmed = rule.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return .none }
+
+        if TemplateEngine.parsePut(trimmed) != nil {
+            guard TemplateEngine.executePut(trimmed, context: context, ruleEngine: self) else {
+                throw RuleError.executionFailed("@put 执行失败：\(trimmed)")
+            }
+            return context.lastResult
+        }
+
+        if let key = TemplateEngine.parseGet(trimmed) {
+            let value = TemplateEngine.executeGet(key, context: context)
+            return value.isEmpty ? .none : .string(value)
+        }
 
         let operators = RuleSplitter.parseOperators(trimmed)
 

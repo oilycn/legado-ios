@@ -23,6 +23,10 @@ class ReaderViewModel: ObservableObject {
     @Published var durChapterPos: Int32 = 0
     @Published var theme: ReaderTheme = .light
     
+    // MARK: - 分页状态
+    @Published var currentPageIndex: Int = 0
+    @Published var totalPages: Int = 0
+    
     // MARK: - 阅读设置
     @Published var fontSize: CGFloat = 18
     @Published var lineSpacing: CGFloat = 8

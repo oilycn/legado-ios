@@ -42,6 +42,7 @@ class AnalyzeUrl {
         source: BookSource? = nil
     ) -> AnalyzedUrl {
         var result = AnalyzedUrl(url: "")
+        let templateContext = buildTemplateContext(key: key, page: page, source: source)
         
         // 1. 分离 URL 和配置 JSON
         var urlPart = ruleUrl
@@ -58,7 +59,7 @@ class AnalyzeUrl {
         }
         
         // 2. 变量替换
-        urlPart = replaceVariables(urlPart, key: key, page: page)
+        urlPart = replaceVariables(urlPart, context: templateContext)
         
         // 3. 解析 HTTP 方法
         if let method = configJson?["method"] as? String {
@@ -67,12 +68,12 @@ class AnalyzeUrl {
         
         // 4. 解析 POST body
         if let body = configJson?["body"] as? String {
-            result.body = replaceVariables(body, key: key, page: page)
+            result.body = replaceVariables(body, context: templateContext)
         }
         
         // 5. 解析 headers
         if let headers = configJson?["headers"] as? [String: String] {
-            result.headers = headers
+            result.headers = headers.mapValues { replaceVariables($0, context: templateContext) }
         }
         
         // 6. 解析编码
@@ -91,7 +92,7 @@ class AnalyzeUrl {
             let parts = urlPart.split(separator: "\n", maxSplits: 1)
             if parts.count == 2 {
                 urlPart = String(parts[0])
-                result.body = String(parts[1])
+                result.body = replaceVariables(String(parts[1]), context: templateContext)
                 result.method = .post
             }
         }
@@ -116,7 +117,7 @@ class AnalyzeUrl {
            let data = headerStr.data(using: .utf8),
            let sourceHeaders = try? JSONSerialization.jsonObject(with: data) as? [String: String] {
             for (key, value) in sourceHeaders where result.headers[key] == nil {
-                result.headers[key] = value
+                result.headers[key] = replaceVariables(value, context: templateContext)
             }
         }
         
@@ -132,23 +133,37 @@ class AnalyzeUrl {
     // MARK: - 变量替换
     
     /// 替换 URL 中的变量占位符
-    private static func replaceVariables(_ input: String, key: String?, page: Int) -> String {
-        var result = input
-        
-        // {{key}} - 搜索关键词
-        if let key = key {
+    private static func replaceVariables(_ input: String, context: ExecutionContext) -> String {
+        TemplateEngine.render(input, context: context)
+    }
+
+    private static func buildTemplateContext(key: String?, page: Int, source: BookSource?) -> ExecutionContext {
+        let context = ExecutionContext()
+
+        if let key {
             let encodedKey = key.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? key
-            result = result.replacingOccurrences(of: "{{key}}", with: encodedKey)
-            result = result.replacingOccurrences(of: "{{searchKey}}", with: encodedKey)
+            context.variables["key"] = encodedKey
+            context.variables["searchKey"] = encodedKey
         }
-        
-        // {{page}} - 页码
-        result = result.replacingOccurrences(of: "{{page}}", with: "\(page)")
-        
-        // {{page-1}} - 页码 (0-based)
-        result = result.replacingOccurrences(of: "{{page-1}}", with: "\(page - 1)")
-        
-        return result
+
+        context.variables["page"] = "\(page)"
+        context.variables["page-1"] = "\(page - 1)"
+
+        if let variable = source?.variable,
+           let data = variable.data(using: .utf8),
+           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+            for (name, value) in json {
+                if let string = value as? String {
+                    context.variables[name] = string
+                } else if let bool = value as? Bool {
+                    context.variables[name] = bool ? "true" : "false"
+                } else if let number = value as? NSNumber {
+                    context.variables[name] = number.stringValue
+                }
+            }
+        }
+
+        return context
     }
     
     // MARK: - JSON 配置查找

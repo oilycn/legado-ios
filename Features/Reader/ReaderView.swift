@@ -24,7 +24,9 @@ struct ReaderView: View {
                     .ignoresSafeArea()
                 
                 // 内容区域
-                ReaderPageView(viewModel: viewModel)
+                PagedReaderView(viewModel: viewModel) {
+                    withAnimation { showUI.toggle() }
+                }
                 
                 // 顶部工具栏
                 VStack {
@@ -81,9 +83,8 @@ struct ReaderView: View {
                 }
             }
             .onTapGesture {
-                withAnimation {
-                    showUI.toggle()
-                }
+                // 点击手势由 PagedReaderView 内部处理
+                // 仅在滚动模式下由外层处理
             }
             .onAppear {
                 viewModel.loadBook(book)
@@ -195,25 +196,14 @@ struct ReaderBottomBar: View {
     }
 }
 
-// MARK: - 分页视图
+// MARK: - 旧分页视图（保留向后兼容）
+/// @available(*, deprecated, message: "请使用 PagedReaderView")
 struct ReaderPageView: View {
     @ObservedObject var viewModel: ReaderViewModel
     
     var body: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                if let content = viewModel.chapterContent {
-                    Text(content)
-                        .font(.system(size: viewModel.fontSize))
-                        .lineSpacing(viewModel.lineSpacing)
-                        .padding(viewModel.pagePadding)
-                        .textSelection(.enabled)
-                        .id("content")
-                } else {
-                    ProgressView()
-                }
-            }
-            .background(viewModel.backgroundColor)
+        PagedReaderView(viewModel: viewModel) {
+            // 默认无操作
         }
     }
 }

@@ -115,6 +115,7 @@ extension BookSource {
         var coverUrl: String?
         var lastChapter: String?
         var wordCount: String?
+        var kind: String?
     }
     
     /// 书籍信息规则
