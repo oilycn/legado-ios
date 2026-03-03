@@ -34,6 +34,10 @@ class ReaderViewModel: ObservableObject {
     @Published var backgroundColor: Color = .white
     @Published var textColor: Color = .black
     
+    // MARK: - TTS
+    @Published var showingTTSControls = false
+    let ttsManager = TTSManager()
+    
     // MARK: - 私有属性
     private var ruleEngine: RuleEngine = RuleEngine()
     private var loadTask: Task<Void, Never>?

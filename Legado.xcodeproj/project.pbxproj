@@ -72,6 +72,10 @@
 		1A00000000000055 /* WebDAVClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000055 /* WebDAVClient.swift */; };
 		1A00000000000056 /* WebDAVSyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000056 /* WebDAVSyncManager.swift */; };
 		1A00000000000057 /* WebDAVConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000057 /* WebDAVConfigView.swift */; };
+		1A00000000000058 /* PagedReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000058 /* PagedReaderView.swift */; };
+		1A00000000000059 /* PageSplitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000059 /* PageSplitter.swift */; };
+		1A0000000000005A /* CoverPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1000000000005A /* CoverPageView.swift */; };
+		1A0000000000005B /* SlidePageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1000000000005B /* SlidePageView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -139,6 +143,10 @@
 		1A10000000000055 /* WebDAVClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebDAVClient.swift; sourceTree = "<group>"; };
 		1A10000000000056 /* WebDAVSyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebDAVSyncManager.swift; sourceTree = "<group>"; };
 		1A10000000000057 /* WebDAVConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebDAVConfigView.swift; sourceTree = "<group>"; };
+		1A10000000000058 /* PagedReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagedReaderView.swift; sourceTree = "<group>"; };
+		1A10000000000059 /* PageSplitter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageSplitter.swift; sourceTree = "<group>"; };
+		1A1000000000005A /* CoverPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverPageView.swift; sourceTree = "<group>"; };
+		1A1000000000005B /* SlidePageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlidePageView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */

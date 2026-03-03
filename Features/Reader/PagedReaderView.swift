@@ -93,27 +93,12 @@ struct PagedReaderView: View {
             scrollView
             
         case .simulation:
-            // 仿真翻页需要 P0-T6 实现
-            ZStack {
-                SlidePageView(
-                    viewModel: viewModel,
-                    pages: pages,
-                    currentPage: $currentPage,
-                    onTap: onTap
-                )
-                
-                VStack {
-                    Text("仿真翻页将在 P0-T6 实现")
-                        .font(.caption2)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Capsule().fill(Color.black.opacity(0.5)))
-                    Spacer()
-                }
-                .padding(.top, 8)
-                .allowsHitTesting(false)
-            }
+            CurlPageView(
+                viewModel: viewModel,
+                pages: pages,
+                currentPage: $currentPage,
+                onTap: onTap
+            )
             
         case .none:
             InstantPageView(
