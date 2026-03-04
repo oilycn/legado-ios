@@ -374,14 +374,14 @@ struct CacheCleanView: View {
             }
             
             Section {
-                Button(action: clearImageCache) {
+                Button(action: { clearImageCache() }) {
                     HStack {
                         Image(systemName: "trash")
                         Text("清理图片缓存")
                     }
                 }
                 
-                Button(action: clearChapterCache) {
+                Button(action: { clearChapterCache() }) {
                     HStack {
                         Image(systemName: "trash")
                         Text("清理章节缓存")
@@ -408,52 +408,65 @@ struct CacheCleanView: View {
     }
     
     private func calculateCacheSize() {
-        // 图片缓存
-        let imgDir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?
-            .appendingPathComponent("ImageCache")
-        imageCacheSize = folderSize(imgDir)
-        
-        // 章节缓存
-        let chapterDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?
-            .appendingPathComponent("ChapterCache")
-        chapterCacheSize = folderSize(chapterDir)
+        imageCacheSize = folderSize(imageCacheDir())
+        chapterCacheSize = folderSize(chapterCacheDir())
+    }
+
+    private func imageCacheDir() -> URL? {
+        FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?
+            .appendingPathComponent("images", isDirectory: true)
+    }
+
+    private func chapterCacheDir() -> URL? {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?
+            .appendingPathComponent("chapters", isDirectory: true)
     }
     
     private func folderSize(_ url: URL?) -> String {
         guard let url = url else { return "0 B" }
         let fm = FileManager.default
-        guard let items = try? fm.contentsOfDirectory(at: url, includingPropertiesForKeys: [.fileSizeKey]) else { return "0 B" }
         var total: Int64 = 0
-        for item in items {
-            if let size = try? item.resourceValues(forKeys: [.fileSizeKey]).fileSize {
-                total += Int64(size)
-            }
+        guard let enumerator = fm.enumerator(at: url, includingPropertiesForKeys: [.isRegularFileKey, .fileSizeKey]) else {
+            return "0 B"
+        }
+
+        for case let itemURL as URL in enumerator {
+            guard let values = try? itemURL.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey]) else { continue }
+            guard values.isRegularFile == true else { continue }
+            total += Int64(values.fileSize ?? 0)
         }
         return ByteCountFormatter.string(fromByteCount: total, countStyle: .file)
     }
     
-    private func clearImageCache() {
-        let dir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?
-            .appendingPathComponent("ImageCache")
+    private func clearImageCache(showMessage: Bool = true) {
+        let dir = imageCacheDir()
         clearDir(dir)
         ImageCacheManager.shared.clearCache()
         calculateCacheSize()
-        alertMessage = "图片缓存已清理"
-        showingAlert = true
+
+        if showMessage {
+            alertMessage = "图片缓存已清理"
+            showingAlert = true
+        }
     }
     
-    private func clearChapterCache() {
-        let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?
-            .appendingPathComponent("ChapterCache")
+    private func clearChapterCache(showMessage: Bool = true) {
+        let dir = chapterCacheDir()
         clearDir(dir)
         calculateCacheSize()
-        alertMessage = "章节缓存已清理"
-        showingAlert = true
+
+        if showMessage {
+            alertMessage = "章节缓存已清理"
+            showingAlert = true
+        }
     }
     
     private func clearAll() {
-        clearImageCache()
-        clearChapterCache()
+        isClearing = true
+        defer { isClearing = false }
+
+        clearImageCache(showMessage: false)
+        clearChapterCache(showMessage: false)
         alertMessage = "全部缓存已清理"
         showingAlert = true
     }

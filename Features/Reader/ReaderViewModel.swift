@@ -22,9 +22,16 @@ class ReaderViewModel: ObservableObject {
     @Published var currentBook: Book?
     @Published var durChapterPos: Int32 = 0
     @Published var theme: ReaderTheme = .light
+    @Published var useReplaceRule: Bool = true
     
     // MARK: - 分页状态
-    @Published var currentPageIndex: Int = 0
+    @Published var currentPageIndex: Int = 0 {
+        didSet {
+            if oldValue != currentPageIndex {
+                updatePagingProgressIfNeeded()
+            }
+        }
+    }
     @Published var totalPages: Int = 0
     
     // MARK: - 阅读设置
@@ -126,6 +133,9 @@ class ReaderViewModel: ObservableObject {
         loadTask = Task {
             do {
                 try Task.checkCancellation()
+
+                applyReadConfig(book)
+
                 // 加载目录
                 try await loadChapters(book: book)
                 
@@ -133,11 +143,10 @@ class ReaderViewModel: ObservableObject {
                 let chapterIndex = Int(book.durChapterIndex)
                 if chapterIndex < chapters.count {
                     currentChapterIndex = chapterIndex
-                    try await loadChapter(at: chapterIndex)
+                    durChapterPos = book.durChapterPos
+                    let restorePage = max(0, Int(book.durChapterPos))
+                    try await loadChapter(at: chapterIndex, restorePageIndex: restorePage)
                 }
-                
-                // 应用阅读配置
-                applyReadConfig(book)
                 
                 isLoading = false
             } catch is CancellationError {
@@ -153,19 +162,55 @@ class ReaderViewModel: ObservableObject {
     private func loadChapters(book: Book) async throws {
         let request = BookChapter.fetchRequest(byBookId: book.bookId)
         
-        let chapters = try CoreDataStack.shared.viewContext.fetch(request)
+        let context = CoreDataStack.shared.viewContext
+        var chapters = try context.fetch(request)
+
+        if chapters.isEmpty, !book.isLocal {
+            guard let sourceId = UUID(uuidString: book.origin) else {
+                throw ReaderError.noSource
+            }
+
+            let sourceRequest: NSFetchRequest<BookSource> = BookSource.fetchRequest()
+            sourceRequest.fetchLimit = 1
+            sourceRequest.predicate = NSPredicate(format: "sourceId == %@", sourceId as CVarArg)
+            guard let source = try context.fetch(sourceRequest).first else {
+                throw ReaderError.noSource
+            }
+
+            let webChapters = try await WebBook.getChapterList(source: source, book: book)
+            guard !webChapters.isEmpty else {
+                throw ReaderError.noChapters
+            }
+
+            for web in webChapters {
+                let chapter = BookChapter.create(
+                    in: context,
+                    bookId: book.bookId,
+                    url: web.url,
+                    index: Int32(web.index),
+                    title: web.title
+                )
+                chapter.book = book
+                chapter.sourceId = source.sourceId.uuidString
+                chapter.isVIP = web.isVip
+            }
+
+            book.totalChapterNum = Int32(webChapters.count)
+            try CoreDataStack.shared.save()
+
+            chapters = try context.fetch(request)
+        }
+
         self.chapters = chapters
         self.totalChapters = chapters.count
-        
+
         if chapters.isEmpty {
-            // 如果本地没有目录，需要从书源获取
-            // TODO: 实现从书源获取目录
             throw ReaderError.noChapters
         }
     }
     
     // MARK: - 加载章节
-    func loadChapter(at index: Int) async throws {
+    func loadChapter(at index: Int, restorePageIndex: Int? = nil) async throws {
         guard index >= 0 && index < chapters.count else {
             throw ReaderError.invalidChapterIndex
         }
@@ -173,7 +218,13 @@ class ReaderViewModel: ObservableObject {
         isLoading = true
         currentChapterIndex = index
         currentChapter = chapters[index]
-        currentPageIndex = 0
+        if let restorePageIndex {
+            currentPageIndex = max(0, restorePageIndex)
+            durChapterPos = Int32(currentPageIndex)
+        } else {
+            currentPageIndex = 0
+            durChapterPos = 0
+        }
         
         do {
             // 尝试从缓存加载
@@ -248,15 +299,35 @@ class ReaderViewModel: ObservableObject {
     // MARK: - 阅读配置
     func applyReadConfig(_ book: Book) {
         let config = book.readConfigObj
-        
-        // 应用翻页动画
-        // TODO: 实现翻页动画
-        
+
+        seedGlobalPageAnimationIfNeeded(from: config)
+
         // 应用主题
         applyTheme(themeFromStorage(UserDefaults.standard.string(forKey: "reader.theme") ?? "亮色"))
-        
-        // 应用其他设置
-        // TODO: 实现更多配置项
+
+        useReplaceRule = config.useReplaceRule
+    }
+
+    private func seedGlobalPageAnimationIfNeeded(from config: ReadConfig) {
+        let defaults = UserDefaults.standard
+        guard defaults.object(forKey: "pageAnimation") == nil else {
+            return
+        }
+        defaults.set(Self.pageAnimationRawValue(from: config.pageAnim), forKey: "pageAnimation")
+    }
+
+    private static func pageAnimationRawValue(from configValue: Int32) -> String {
+        let animation = PageAnimation(rawValue: configValue) ?? .cover
+        switch animation {
+        case .cover:
+            return PageAnimationType.cover.rawValue
+        case .simulation:
+            return PageAnimationType.simulation.rawValue
+        case .slide:
+            return PageAnimationType.slide.rawValue
+        case .scroll:
+            return PageAnimationType.scroll.rawValue
+        }
     }
     
     func applyTheme(_ theme: ReaderTheme) {
@@ -282,6 +353,9 @@ class ReaderViewModel: ObservableObject {
 
     private func applyReplaceRulesIfNeeded(_ text: String, chapter: BookChapter) -> String {
         guard let book = currentBook else { return text }
+        if !useReplaceRule {
+            return text
+        }
         return ReplaceEngineEnhanced.shared.applyForReader(
             text: text,
             bookId: book.bookId,
@@ -302,6 +376,15 @@ class ReaderViewModel: ObservableObject {
         guard currentPageIndex > 0 else { return false }
         currentPageIndex -= 1
         return true
+    }
+
+    private func updatePagingProgressIfNeeded() {
+        let clamped = max(0, currentPageIndex)
+        let newPos = Int32(clamped)
+        if durChapterPos != newPos {
+            durChapterPos = newPos
+        }
+        saveProgress()
     }
 
     func setTheme(_ theme: ReaderTheme) async {
@@ -445,10 +528,6 @@ class ReaderViewModel: ObservableObject {
         saveProgress()
     }
     
-    func goBack() {
-        saveProgress()
-        // TODO: 返回书架
-    }
 }
 
 extension ReaderViewModel {

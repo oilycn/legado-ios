@@ -10,6 +10,9 @@ import SwiftUI
 struct SearchResultView: View {
     @StateObject private var viewModel = SearchViewModel()
     @State private var showingSourcePicker = false
+    @State private var navigatingToBookDetail = false
+    @State private var selectedBook: Book?
+    @State private var openingResultId: UUID?
     
     var body: some View {
         VStack {
@@ -24,7 +27,23 @@ struct SearchResultView: View {
                 )
             } else {
                 List(viewModel.searchResults) { result in
-                    SearchResultItemView(result: result)
+                    Button {
+                        guard openingResultId == nil else { return }
+                        openingResultId = result.id
+                        Task {
+                            defer { openingResultId = nil }
+                            do {
+                                selectedBook = try await viewModel.addToBookshelf(result: result)
+                                navigatingToBookDetail = true
+                            } catch {
+                                viewModel.errorMessage = "加入书架失败：\(error.localizedDescription)"
+                            }
+                        }
+                    } label: {
+                        SearchResultItemView(result: result)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(openingResultId == result.id)
                 }
             }
         }
@@ -45,12 +64,28 @@ struct SearchResultView: View {
         .sheet(isPresented: $showingSourcePicker) {
             SourcePickerView(selectedSources: $viewModel.selectedSources)
         }
+        .navigationDestination(isPresented: $navigatingToBookDetail) {
+            if let book = selectedBook {
+                BookDetailView(book: book)
+            } else {
+                Text("未找到书籍")
+            }
+        }
+        .alert("操作失败", isPresented: Binding(
+            get: { viewModel.errorMessage != nil },
+            set: { if !$0 { viewModel.errorMessage = nil } }
+        )) {
+            Button("确定", role: .cancel) {
+                viewModel.errorMessage = nil
+            }
+        } message: {
+            Text(viewModel.errorMessage ?? "未知错误")
+        }
     }
 }
 
 struct SearchResultItemView: View {
     let result: SearchViewModel.SearchResult
-    @State private var showingDetail = false
     
     var body: some View {
         HStack(spacing: 12) {
@@ -87,9 +122,6 @@ struct SearchResultItemView: View {
             }
             
             Spacer()
-        }
-        .onTapGesture {
-            showingDetail = true
         }
     }
 }

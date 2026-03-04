@@ -7,7 +7,7 @@
         <attribute name="kind" optional="YES" attributeType="String"/>
         <attribute name="coverUrl" optional="YES" attributeType="String"/>
         <attribute name="intro" optional="YES" attributeType="String"/>
-        <attribute name="bookUrl" optional="NO" attributeType="String"/>
+        <attribute name="bookUrl" optional="NO" attributeType="String" indexed="YES"/>
         <attribute name="tocUrl" optional="NO" attributeType="String"/>
         <attribute name="origin" optional="NO" attributeType="String"/>
         <attribute name="originName" optional="NO" attributeType="String"/>
@@ -116,11 +116,170 @@
         <attribute name="priority" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="order" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
     </entity>
+    <entity name="BookGroup" representedClassName="BookGroup" syncable="YES" codeGenerationType="none">
+        <attribute name="groupId" optional="NO" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="groupName" optional="NO" attributeType="String"/>
+        <attribute name="cover" optional="YES" attributeType="String"/>
+        <attribute name="order" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="enableRefresh" optional="NO" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="show" optional="NO" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+    </entity>
+    <entity name="SearchBook" representedClassName="SearchBook" syncable="YES" codeGenerationType="none">
+        <attribute name="bookUrl" optional="NO" attributeType="String"/>
+        <attribute name="origin" optional="NO" attributeType="String"/>
+        <attribute name="originName" optional="NO" attributeType="String"/>
+        <attribute name="type" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="name" optional="NO" attributeType="String"/>
+        <attribute name="author" optional="NO" attributeType="String"/>
+        <attribute name="kind" optional="YES" attributeType="String"/>
+        <attribute name="coverUrl" optional="YES" attributeType="String"/>
+        <attribute name="intro" optional="YES" attributeType="String"/>
+        <attribute name="wordCount" optional="YES" attributeType="String"/>
+        <attribute name="latestChapterTitle" optional="YES" attributeType="String"/>
+        <attribute name="tocUrl" optional="YES" attributeType="String"/>
+        <attribute name="time" optional="NO" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="variable" optional="YES" attributeType="String"/>
+        <attribute name="originOrder" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+    </entity>
+    <entity name="SearchKeyword" representedClassName="SearchKeyword" syncable="YES" codeGenerationType="none">
+        <attribute name="word" optional="NO" attributeType="String"/>
+        <attribute name="usage" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="lastUseTime" optional="NO" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+    </entity>
+    <entity name="RssSource" representedClassName="RssSource" syncable="YES" codeGenerationType="none">
+        <attribute name="sourceUrl" optional="NO" attributeType="String"/>
+        <attribute name="sourceName" optional="NO" attributeType="String"/>
+        <attribute name="sourceIcon" optional="YES" attributeType="String"/>
+        <attribute name="sourceGroup" optional="YES" attributeType="String"/>
+        <attribute name="sourceComment" optional="YES" attributeType="String"/>
+        <attribute name="enabled" optional="NO" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="sortUrl" optional="YES" attributeType="String"/>
+        <attribute name="singleUrl" optional="NO" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="articleStyle" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="header" optional="YES" attributeType="String"/>
+        <attribute name="loginUrl" optional="YES" attributeType="String"/>
+        <attribute name="loginUi" optional="YES" attributeType="String"/>
+        <attribute name="loginCheckJs" optional="YES" attributeType="String"/>
+        <attribute name="concurrentRate" optional="YES" attributeType="String"/>
+        <attribute name="jsLib" optional="YES" attributeType="String"/>
+        <attribute name="enabledCookieJar" optional="NO" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="ruleArticles" optional="YES" attributeType="String"/>
+        <attribute name="ruleNextPage" optional="YES" attributeType="String"/>
+        <attribute name="ruleTitle" optional="YES" attributeType="String"/>
+        <attribute name="rulePubDate" optional="YES" attributeType="String"/>
+        <attribute name="ruleDescription" optional="YES" attributeType="String"/>
+        <attribute name="ruleImage" optional="YES" attributeType="String"/>
+        <attribute name="ruleLink" optional="YES" attributeType="String"/>
+        <attribute name="ruleContent" optional="YES" attributeType="String"/>
+        <attribute name="style" optional="YES" attributeType="String"/>
+        <attribute name="injectJs" optional="YES" attributeType="String"/>
+        <attribute name="enableJs" optional="NO" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="customOrder" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="lastUpdateTime" optional="NO" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="variable" optional="YES" attributeType="String"/>
+        <attribute name="variableComment" optional="YES" attributeType="String"/>
+        <attribute name="customTag" optional="YES" attributeType="String"/>
+        <attribute name="coverDecodeJs" optional="YES" attributeType="String"/>
+    </entity>
+    <entity name="RssArticle" representedClassName="RssArticle" syncable="YES" codeGenerationType="none">
+        <attribute name="origin" optional="NO" attributeType="String"/>
+        <attribute name="sort" optional="NO" attributeType="String"/>
+        <attribute name="title" optional="NO" attributeType="String"/>
+        <attribute name="order" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="link" optional="NO" attributeType="String"/>
+        <attribute name="pubDate" optional="YES" attributeType="String"/>
+        <attribute name="articleDescription" optional="YES" attributeType="String"/>
+        <attribute name="content" optional="YES" attributeType="String"/>
+        <attribute name="image" optional="YES" attributeType="String"/>
+        <attribute name="read" optional="NO" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="variable" optional="YES" attributeType="String"/>
+    </entity>
+    <entity name="RssReadRecord" representedClassName="RssReadRecord" syncable="YES" codeGenerationType="none">
+        <attribute name="record" optional="NO" attributeType="String"/>
+        <attribute name="read" optional="NO" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+    </entity>
+    <entity name="RssStar" representedClassName="RssStar" syncable="YES" codeGenerationType="none">
+        <attribute name="origin" optional="NO" attributeType="String"/>
+        <attribute name="sort" optional="NO" attributeType="String"/>
+        <attribute name="title" optional="NO" attributeType="String"/>
+        <attribute name="starDate" optional="NO" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="link" optional="NO" attributeType="String"/>
+        <attribute name="pubDate" optional="YES" attributeType="String"/>
+        <attribute name="articleDescription" optional="YES" attributeType="String"/>
+        <attribute name="content" optional="YES" attributeType="String"/>
+        <attribute name="image" optional="YES" attributeType="String"/>
+        <attribute name="variable" optional="YES" attributeType="String"/>
+    </entity>
+    <entity name="CacheEntry" representedClassName="CacheEntry" syncable="YES" codeGenerationType="none">
+        <attribute name="key" optional="NO" attributeType="String"/>
+        <attribute name="value" optional="YES" attributeType="String"/>
+        <attribute name="deadLine" optional="NO" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+    </entity>
+    <entity name="Cookie" representedClassName="Cookie" syncable="YES" codeGenerationType="none">
+        <attribute name="url" optional="NO" attributeType="String"/>
+        <attribute name="cookie" optional="NO" attributeType="String"/>
+    </entity>
+    <entity name="ReadRecord" representedClassName="ReadRecord" syncable="YES" codeGenerationType="none">
+        <attribute name="deviceId" optional="NO" attributeType="String"/>
+        <attribute name="bookName" optional="NO" attributeType="String"/>
+        <attribute name="readTime" optional="NO" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="lastRead" optional="NO" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+    </entity>
+    <entity name="HttpTTS" representedClassName="HttpTTS" syncable="YES" codeGenerationType="none">
+        <attribute name="id" optional="NO" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="name" optional="NO" attributeType="String"/>
+        <attribute name="url" optional="NO" attributeType="String"/>
+        <attribute name="header" optional="YES" attributeType="String"/>
+        <attribute name="loginUrl" optional="YES" attributeType="String"/>
+        <attribute name="loginUi" optional="YES" attributeType="String"/>
+        <attribute name="loginCheckJs" optional="YES" attributeType="String"/>
+        <attribute name="contentType" optional="YES" attributeType="String"/>
+        <attribute name="concurrentRate" optional="YES" attributeType="String"/>
+        <attribute name="enabled" optional="NO" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="order" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+    </entity>
+    <entity name="DictRule" representedClassName="DictRule" syncable="YES" codeGenerationType="none">
+        <attribute name="name" optional="NO" attributeType="String"/>
+        <attribute name="urlRule" optional="NO" attributeType="String"/>
+        <attribute name="showRule" optional="NO" attributeType="String"/>
+        <attribute name="enabled" optional="NO" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="sortNumber" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+    </entity>
+    <entity name="RuleSub" representedClassName="RuleSub" syncable="YES" codeGenerationType="none">
+        <attribute name="id" optional="NO" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="name" optional="NO" attributeType="String"/>
+        <attribute name="url" optional="NO" attributeType="String"/>
+        <attribute name="type" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="customOrder" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="autoUpdate" optional="NO" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="lastUpdateTime" optional="NO" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+    </entity>
+    <entity name="TxtTocRule" representedClassName="TxtTocRule" syncable="YES" codeGenerationType="none">
+        <attribute name="name" optional="NO" attributeType="String"/>
+        <attribute name="rule" optional="NO" attributeType="String"/>
+        <attribute name="serialNumber" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="example" optional="YES" attributeType="String"/>
+        <attribute name="enabled" optional="NO" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+    </entity>
     <elements>
         <element name="Book" positionX="-63" positionY="-18" width="128" height="704"/>
         <element name="BookSource" positionX="180" positionY="-18" width="128" height="560"/>
         <element name="BookChapter" positionX="-316" positionY="-18" width="128" height="320"/>
         <element name="Bookmark" positionX="-316" positionY="320" width="128" height="220"/>
-    </elements>
         <element name="ReplaceRule" positionX="180" positionY="600" width="128" height="223"/>
+        <element name="BookGroup" positionX="400" positionY="-18" width="128" height="163"/>
+        <element name="SearchBook" positionX="400" positionY="200" width="128" height="298"/>
+        <element name="SearchKeyword" positionX="400" positionY="520" width="128" height="88"/>
+        <element name="RssSource" positionX="620" positionY="-18" width="128" height="553"/>
+        <element name="RssArticle" positionX="620" positionY="560" width="128" height="208"/>
+        <element name="RssReadRecord" positionX="840" positionY="-18" width="128" height="73"/>
+        <element name="RssStar" positionX="840" positionY="100" width="128" height="193"/>
+        <element name="CacheEntry" positionX="840" positionY="320" width="128" height="88"/>
+        <element name="Cookie" positionX="840" positionY="430" width="128" height="73"/>
+        <element name="ReadRecord" positionX="840" positionY="520" width="128" height="103"/>
+        <element name="HttpTTS" positionX="1060" positionY="-18" width="128" height="208"/>
+        <element name="DictRule" positionX="1060" positionY="220" width="128" height="118"/>
+        <element name="RuleSub" positionX="1060" positionY="360" width="128" height="148"/>
+        <element name="TxtTocRule" positionX="1060" positionY="530" width="128" height="118"/>
+    </elements>
 </model>

@@ -9,31 +9,30 @@ import SwiftUI
 
 struct AddBookView: View {
     @Environment(\.dismiss) var dismiss
-    @State private var searchText = ""
-    @State private var searchResults: [String] = []
+
+    @State private var showingLocalImport = false
+    @State private var showingQRScanner = false
+    @State private var showingSearch = false
     
     var body: some View {
         NavigationView {
-            VStack {
-                Text("添加书籍功能开发中")
-                    .foregroundColor(.secondary)
-                
-                Text("可以通过以下方式添加：")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                List {
-                    Button("本地导入") {
-                        // TODO: 导入本地书籍
-                    }
-                    
-                    Button("扫码添加") {
-                        // TODO: 扫码
-                    }
-                    
-                    Button("搜索添加") {
-                        // TODO: 搜索
-                    }
+            List {
+                Button {
+                    showingLocalImport = true
+                } label: {
+                    Label("本地导入", systemImage: "folder")
+                }
+
+                Button {
+                    showingQRScanner = true
+                } label: {
+                    Label("扫码添加", systemImage: "qrcode.viewfinder")
+                }
+
+                Button {
+                    showingSearch = true
+                } label: {
+                    Label("搜索添加", systemImage: "magnifyingglass")
                 }
             }
             .navigationTitle("添加书籍")
@@ -43,6 +42,15 @@ struct AddBookView: View {
                         dismiss()
                     }
                 }
+            }
+            .sheet(isPresented: $showingLocalImport) {
+                NavigationStack { LocalBookView() }
+            }
+            .sheet(isPresented: $showingQRScanner) {
+                QRCodeScanView()
+            }
+            .sheet(isPresented: $showingSearch) {
+                NavigationStack { SearchResultView() }
             }
         }
     }

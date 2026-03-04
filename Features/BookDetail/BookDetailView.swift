@@ -12,6 +12,7 @@ struct BookDetailView: View {
     @StateObject private var viewModel: BookDetailViewModel
     @State private var showingChapterList = false
     @State private var showingSourceSelection = false
+    @State private var navigatingToReader = false
     @Environment(\.dismiss) var dismiss
     
     let book: Book
@@ -22,26 +23,38 @@ struct BookDetailView: View {
     }
     
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                // 封面和基本信息
-                bookHeader
-                
-                // 操作按钮
-                actionButtons
-                
-                // 简介
-                if let intro = book.displayIntro, !intro.isEmpty {
-                    introductionSection
+        ZStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    // 封面和基本信息
+                    bookHeader
+                    
+                    // 操作按钮
+                    actionButtons
+                    
+                    // 简介
+                    if let intro = book.displayIntro, !intro.isEmpty {
+                        introductionSection
+                    }
+                    
+                    // 目录预览
+                    tocPreviewSection
+                    
+                    // 书籍信息
+                    bookInfoSection
                 }
-                
-                // 目录预览
-                tocPreviewSection
-                
-                // 书籍信息
-                bookInfoSection
+                .padding()
             }
-            .padding()
+
+            if viewModel.isLoading {
+                Color.black.opacity(0.2)
+                    .ignoresSafeArea()
+
+                ProgressView("处理中...")
+                    .padding()
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(12)
+            }
         }
         .navigationTitle("书籍详情")
         .navigationBarTitleDisplayMode(.inline)
@@ -85,6 +98,9 @@ struct BookDetailView: View {
         }
         .sheet(isPresented: $showingSourceSelection) {
             SourceSelectionSheet(book: book, selectedSource: $viewModel.currentSource)
+        }
+        .navigationDestination(isPresented: $navigatingToReader) {
+            ReaderView(book: book)
         }
         .alert("提示", isPresented: $viewModel.showingAlert) {
             Button("确定", role: .cancel) {}
@@ -157,7 +173,11 @@ struct BookDetailView: View {
     // MARK: - 操作按钮
     private var actionButtons: some View {
         HStack(spacing: 16) {
-            Button(action: { viewModel.startReading() }) {
+            Button(action: {
+                if viewModel.startReading() {
+                    navigatingToReader = true
+                }
+            }) {
                 Label(book.readProgress > 0 ? "继续阅读" : "开始阅读", systemImage: "book.fill")
                     .frame(maxWidth: .infinity)
             }
@@ -212,7 +232,11 @@ struct BookDetailView: View {
                     
                     VStack(alignment: .leading, spacing: 8) {
                         ForEach(viewModel.previewChapters) { chapter in
-                            Button(action: { viewModel.readChapter(chapter) }) {
+                            Button(action: {
+                                if viewModel.readChapter(chapter) {
+                                    navigatingToReader = true
+                                }
+                            }) {
                                 HStack {
                                     Text("\(chapter.index + 1). \(chapter.title)")
                                         .font(.body)
@@ -305,10 +329,12 @@ class BookDetailViewModel: ObservableObject {
     
     let book: Book
     private let context = CoreDataStack.shared.viewContext
+    private static let favoriteTag = "favorite"
     
     init(book: Book) {
         self.book = book
         self.currentSource = book.source
+        self.isFavorite = Self.tags(from: book.customTag).contains(Self.favoriteTag)
     }
     
     func loadChapters() async {
@@ -330,37 +356,259 @@ class BookDetailViewModel: ObservableObject {
         }
     }
     
-    func startReading() {
-        // TODO: 导航到阅读器
-        showingAlert = true
-        alertMessage = "阅读器功能开发中"
+    @discardableResult
+    func startReading() -> Bool {
+        prepareReading(startAt: nil)
     }
-    
-    func readChapter(_ chapter: ChapterPreview) {
-        // TODO: 导航到阅读器指定章节
-        showingAlert = true
-        alertMessage = "即将阅读：\(chapter.title)"
+
+    @discardableResult
+    func readChapter(_ chapter: ChapterPreview) -> Bool {
+        prepareReading(startAt: chapter.index, chapterTitle: chapter.title)
     }
     
     func refreshBookInfo() async {
         isLoading = true
-        // TODO: 实现刷新
-        try? await Task.sleep(nanoseconds: 1_000_000_000)
-        isLoading = false
-        showingAlert = true
-        alertMessage = "刷新完成"
+        defer { isLoading = false }
+
+        do {
+            let source = try resolveSource()
+            try await WebBook.getBookInfo(source: source, book: book)
+            let chapterCount = try await refreshChapterList(source: source)
+            book.totalChapterNum = Int32(chapterCount)
+            try CoreDataStack.shared.save()
+            await loadChapters()
+            showingAlert = true
+            alertMessage = "刷新完成（共 \(chapterCount) 章）"
+        } catch {
+            showingAlert = true
+            alertMessage = "刷新失败：\(error.localizedDescription)"
+        }
     }
     
     func toggleFavorite() {
-        isFavorite.toggle()
-        // TODO: 保存到 CoreData
+        var tags = Self.tags(from: book.customTag)
+        if tags.contains(Self.favoriteTag) {
+            tags.remove(Self.favoriteTag)
+        } else {
+            tags.insert(Self.favoriteTag)
+        }
+
+        book.customTag = Self.encodeTags(tags)
+        isFavorite = tags.contains(Self.favoriteTag)
+
+        do {
+            try CoreDataStack.shared.save()
+        } catch {
+            context.rollback()
+            isFavorite = Self.tags(from: book.customTag).contains(Self.favoriteTag)
+            showingAlert = true
+            alertMessage = "收藏状态保存失败：\(error.localizedDescription)"
+        }
     }
     
     func cacheAllChapters() {
-        showingAlert = true
-        alertMessage = "缓存功能开发中"
+        Task {
+            await cacheAllChaptersTask()
+        }
     }
-    
+
+    private func cacheAllChaptersTask() async {
+        guard !book.isLocal else {
+            showingAlert = true
+            alertMessage = "本地书籍无需缓存"
+            return
+        }
+
+        isLoading = true
+        defer { isLoading = false }
+
+        do {
+            let source = try resolveSource()
+
+            _ = try await refreshChapterList(source: source)
+            let request = BookChapter.fetchRequest(byBookId: book.bookId)
+            let chapters = try context.fetch(request)
+
+            var cachedCount = 0
+            var failedCount = 0
+
+            for chapter in chapters {
+                if chapter.isCached, cacheFileExists(for: chapter) {
+                    continue
+                }
+
+                do {
+                    let content = try await WebBook.getContent(source: source, book: book, chapter: chapter)
+                    try cacheChapterToDisk(chapter: chapter, content: content)
+                    cachedCount += 1
+
+                    if cachedCount % 20 == 0 {
+                        try CoreDataStack.shared.save()
+                    }
+                } catch {
+                    failedCount += 1
+                }
+            }
+
+            try CoreDataStack.shared.save()
+            await loadChapters()
+            showingAlert = true
+            if failedCount > 0 {
+                alertMessage = "缓存完成：新增 \(cachedCount) 章，失败 \(failedCount) 章"
+            } else {
+                alertMessage = "缓存完成：新增 \(cachedCount) 章"
+            }
+        } catch {
+            showingAlert = true
+            alertMessage = "缓存失败：\(error.localizedDescription)"
+        }
+    }
+
+    private func resolveSource() throws -> BookSource {
+        if let currentSource {
+            return currentSource
+        }
+
+        guard let sourceUUID = UUID(uuidString: book.origin) else {
+            throw NSError(domain: "BookDetailViewModel", code: 1, userInfo: [NSLocalizedDescriptionKey: "未找到书源"])
+        }
+
+        let request: NSFetchRequest<BookSource> = BookSource.fetchRequest()
+        request.fetchLimit = 1
+        request.predicate = NSPredicate(format: "sourceId == %@", sourceUUID as CVarArg)
+        if let source = try context.fetch(request).first {
+            currentSource = source
+            return source
+        }
+
+        throw NSError(domain: "BookDetailViewModel", code: 2, userInfo: [NSLocalizedDescriptionKey: "未找到书源"])
+    }
+
+    private func refreshChapterList(source: BookSource) async throws -> Int {
+        let webChapters = try await WebBook.getChapterList(source: source, book: book)
+
+        let request = BookChapter.fetchRequest(byBookId: book.bookId)
+        let existing = try context.fetch(request)
+
+        var existingByUrl: [String: BookChapter] = [:]
+        for chapter in existing where !chapter.chapterUrl.isEmpty {
+            if existingByUrl[chapter.chapterUrl] == nil {
+                existingByUrl[chapter.chapterUrl] = chapter
+            }
+        }
+
+        var newUrlSet = Set<String>()
+        newUrlSet.reserveCapacity(webChapters.count)
+
+        for web in webChapters {
+            let url = web.url
+            guard !url.isEmpty else { continue }
+            newUrlSet.insert(url)
+
+            if let chapter = existingByUrl[url] {
+                chapter.title = web.title
+                chapter.index = Int32(web.index)
+                chapter.isVIP = web.isVip
+                chapter.updateTime = Int64(Date().timeIntervalSince1970)
+            } else {
+                let chapter = BookChapter.create(
+                    in: context,
+                    bookId: book.bookId,
+                    url: url,
+                    index: Int32(web.index),
+                    title: web.title
+                )
+                chapter.book = book
+                chapter.sourceId = source.sourceId.uuidString
+                chapter.isVIP = web.isVip
+            }
+        }
+
+        for chapter in existing where !newUrlSet.contains(chapter.chapterUrl) {
+            context.delete(chapter)
+        }
+
+        book.totalChapterNum = Int32(webChapters.count)
+        try CoreDataStack.shared.save()
+        return webChapters.count
+    }
+
+    private func chapterCacheDir() -> URL {
+        let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        return documents.appendingPathComponent("chapters", isDirectory: true)
+    }
+
+    private func cacheFileURL(for chapter: BookChapter) -> URL? {
+        if let cachePath = chapter.cachePath, !cachePath.isEmpty {
+            if cachePath.hasPrefix("/") {
+                return URL(fileURLWithPath: cachePath)
+            }
+            return chapterCacheDir().appendingPathComponent(cachePath)
+        }
+        return nil
+    }
+
+    private func cacheFileExists(for chapter: BookChapter) -> Bool {
+        guard let url = cacheFileURL(for: chapter) else { return false }
+        return FileManager.default.fileExists(atPath: url.path)
+    }
+
+    private func cacheChapterToDisk(chapter: BookChapter, content: String) throws {
+        let dir = chapterCacheDir()
+        if !FileManager.default.fileExists(atPath: dir.path) {
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        }
+
+        let fileName = "\(chapter.bookId.uuidString)_\(chapter.index).txt"
+        let fileURL = dir.appendingPathComponent(fileName)
+        try content.write(to: fileURL, atomically: true, encoding: .utf8)
+
+        chapter.isCached = true
+        chapter.cachePath = fileName
+    }
+
+    @discardableResult
+    private func prepareReading(startAt chapterIndex: Int?, chapterTitle: String? = nil) -> Bool {
+        if let chapterIndex {
+            let safeIndex = max(0, chapterIndex)
+            book.durChapterIndex = Int32(safeIndex)
+            book.durChapterPos = 0
+            book.durChapterTitle = chapterTitle
+        } else {
+            if book.durChapterIndex < 0 {
+                book.durChapterIndex = 0
+            }
+            if book.durChapterPos < 0 {
+                book.durChapterPos = 0
+            }
+        }
+        book.durChapterTime = Int64(Date().timeIntervalSince1970)
+
+        do {
+            try CoreDataStack.shared.save()
+            return true
+        } catch {
+            context.rollback()
+            showingAlert = true
+            alertMessage = "保存阅读进度失败：\(error.localizedDescription)"
+            return false
+        }
+    }
+
+    private static func tags(from raw: String?) -> Set<String> {
+        guard let raw, !raw.isEmpty else { return [] }
+        let values = raw
+            .split(separator: ",")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
+            .filter { !$0.isEmpty }
+        return Set(values)
+    }
+
+    private static func encodeTags(_ tags: Set<String>) -> String? {
+        guard !tags.isEmpty else { return nil }
+        return tags.sorted().joined(separator: ",")
+    }
+
     func deleteBook(_ book: Book) {
         context.delete(book)
         try? CoreDataStack.shared.save()

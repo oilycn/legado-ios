@@ -8,7 +8,6 @@
 
 import SwiftUI
 import AVFoundation
-import CoreData
 
 // MARK: - 二维码扫描视图
 struct QRCodeScanView: View {
@@ -160,6 +159,8 @@ class QRCodeScanViewModel: NSObject, ObservableObject {
     
     var captureSession: AVCaptureSession?
     private var hasProcessed = false
+
+    private let sourceImporter = SourceViewModel()
     
     override init() {
         super.init()
@@ -236,118 +237,32 @@ class QRCodeScanViewModel: NSObject, ObservableObject {
     
     func importFromUrl(_ urlOrJson: String) async {
         isImporting = true
-        
-        do {
-            var jsonData: Data
-            
-            // 判断是 JSON 还是 URL
-            let trimmed = urlOrJson.trimmingCharacters(in: .whitespacesAndNewlines)
-            if trimmed.hasPrefix("[") || trimmed.hasPrefix("{") {
-                // 直接是 JSON
-                jsonData = trimmed.data(using: .utf8) ?? Data()
-            } else if trimmed.hasPrefix("http") {
-                // 从 URL 下载
-                guard let url = URL(string: trimmed) else {
-                    throw ImportError.invalidUrl
-                }
-                let (data, _) = try await URLSession.shared.data(from: url)
-                jsonData = data
-            } else {
-                throw ImportError.invalidFormat
-            }
-            
-            // 解析书源
-            let count = try await importBookSources(from: jsonData)
+
+        sourceImporter.errorMessage = nil
+
+        let trimmed = urlOrJson.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            resultMessage = "导入失败：内容为空"
+            isImporting = false
+            showResult = true
+            return
+        }
+
+        let count: Int
+        if trimmed.hasPrefix("[") || trimmed.hasPrefix("{") {
+            count = sourceImporter.importFromText(trimmed)
+        } else {
+            count = await sourceImporter.importFromURL(trimmed)
+        }
+
+        if count > 0 {
             resultMessage = "成功导入 \(count) 个书源"
-        } catch {
-            resultMessage = "导入失败：\(error.localizedDescription)"
+        } else {
+            resultMessage = "导入失败：\(sourceImporter.errorMessage ?? "无效的书源格式")"
         }
         
         isImporting = false
         showResult = true
-    }
-    
-    private func importBookSources(from data: Data) async throws -> Int {
-        // 尝试解析为书源 JSON 数组
-        guard let jsonArray = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
-            // 尝试单个书源
-            if let jsonDict = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                try await importSingleSource(jsonDict)
-                return 1
-            }
-            throw ImportError.invalidFormat
-        }
-        
-        var count = 0
-        let context = CoreDataStack.shared.viewContext
-        
-        for sourceDict in jsonArray {
-            do {
-                try await importSingleSource(sourceDict)
-                count += 1
-            } catch {
-                print("导入书源失败：\(error)")
-            }
-        }
-        
-        try CoreDataStack.shared.save()
-        return count
-    }
-    
-    private func importSingleSource(_ dict: [String: Any]) async throws {
-        let context = CoreDataStack.shared.viewContext
-        
-        guard let bookSourceUrl = dict["bookSourceUrl"] as? String,
-              let bookSourceName = dict["bookSourceName"] as? String else {
-            throw ImportError.missingFields
-        }
-        
-        // 检查重复
-        let request: NSFetchRequest<BookSource> = BookSource.fetchRequest()
-        request.predicate = NSPredicate(format: "bookSourceUrl == %@", bookSourceUrl)
-        
-        let existing = try? context.fetch(request)
-        let source: BookSource
-        
-        if let existingSource = existing?.first {
-            source = existingSource
-        } else {
-            source = BookSource.create(in: context)
-        }
-        
-        // 填充基本信息
-        source.bookSourceUrl = bookSourceUrl
-        source.bookSourceName = bookSourceName
-        source.bookSourceGroup = dict["bookSourceGroup"] as? String
-        source.bookSourceType = (dict["bookSourceType"] as? NSNumber)?.int32Value ?? 0
-        source.bookSourceComment = dict["bookSourceComment"] as? String
-        source.enabled = (dict["enabled"] as? Bool) ?? true
-        source.searchUrl = dict["searchUrl"] as? String
-        source.exploreUrl = dict["exploreUrl"] as? String
-        source.header = dict["header"] as? String
-        source.loginUrl = dict["loginUrl"] as? String
-        
-        // 转换规则 JSON
-        if let ruleSearch = dict["ruleSearch"] as? [String: Any],
-           let data = try? JSONSerialization.data(withJSONObject: ruleSearch) {
-            source.ruleSearchData = data
-        }
-        if let ruleExplore = dict["ruleExplore"] as? [String: Any],
-           let data = try? JSONSerialization.data(withJSONObject: ruleExplore) {
-            source.ruleExploreData = data
-        }
-        if let ruleBookInfo = dict["ruleBookInfo"] as? [String: Any],
-           let data = try? JSONSerialization.data(withJSONObject: ruleBookInfo) {
-            source.ruleBookInfoData = data
-        }
-        if let ruleToc = dict["ruleToc"] as? [String: Any],
-           let data = try? JSONSerialization.data(withJSONObject: ruleToc) {
-            source.ruleTocData = data
-        }
-        if let ruleContent = dict["ruleContent"] as? [String: Any],
-           let data = try? JSONSerialization.data(withJSONObject: ruleContent) {
-            source.ruleContentData = data
-        }
     }
 }
 
@@ -400,18 +315,3 @@ struct QRCameraPreview: UIViewRepresentable {
 }
 
 // MARK: - 错误类型
-enum ImportError: LocalizedError {
-    case invalidUrl
-    case invalidFormat
-    case missingFields
-    case saveFailed
-    
-    var errorDescription: String? {
-        switch self {
-        case .invalidUrl: return "无效的 URL"
-        case .invalidFormat: return "无效的书源格式"
-        case .missingFields: return "书源数据缺少必要字段"
-        case .saveFailed: return "保存失败"
-        }
-    }
-}

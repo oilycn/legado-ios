@@ -7,12 +7,18 @@
 
 import SwiftUI
 import CoreData
+import Foundation
+import UniformTypeIdentifiers
 
 struct SourceManageView: View {
     @StateObject private var viewModel = SourceViewModel()
     @State private var showingEdit = false
     @State private var showingImport = false
     @State private var editViewModel: SourceEditViewModel?
+
+    @State private var showingExporter = false
+    @State private var exportDocument = JSONDataDocument()
+    @State private var exportFileName = "bookSource"
     
     var body: some View {
             List {
@@ -57,7 +63,7 @@ struct SourceManageView: View {
                                 Label("导入书源", systemImage: "square.and.arrow.down")
                             }
                             
-                            Button(action: viewModel.exportAllSources) {
+                            Button(action: exportAllSources) {
                                 Label("导出全部", systemImage: "square.and.arrow.up")
                             }
                         } label: {
@@ -86,6 +92,16 @@ struct SourceManageView: View {
             .sheet(isPresented: $showingImport) {
                 SourceImportView(viewModel: viewModel)
             }
+            .fileExporter(
+                isPresented: $showingExporter,
+                document: exportDocument,
+                contentType: .json,
+                defaultFilename: exportFileName
+            ) { result in
+                if case .failure(let error) = result {
+                    viewModel.errorMessage = "导出失败：\(error.localizedDescription)"
+                }
+            }
             .task {
                 await viewModel.loadSources()
             }
@@ -99,6 +115,20 @@ struct SourceManageView: View {
             } message: {
                 Text(viewModel.errorMessage ?? "未知错误")
             }
+    }
+
+    private func exportAllSources() {
+        guard let data = viewModel.exportAllSources() else { return }
+        exportDocument = JSONDataDocument(data: data)
+        exportFileName = makeExportFileName()
+        showingExporter = true
+    }
+
+    private func makeExportFileName() -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "zh_CN")
+        formatter.dateFormat = "yyyyMMdd-HHmmss"
+        return "bookSource-\(formatter.string(from: Date()))"
     }
 }
 
@@ -173,7 +203,8 @@ struct SourceImportView: View {
                     
                     Button(action: {
                         Task {
-                            if await viewModel.importFromURL(importURL) {
+                            let count = await viewModel.importFromURL(importURL)
+                            if count > 0 {
                                 dismiss()
                             }
                         }
@@ -189,7 +220,8 @@ struct SourceImportView: View {
                         .font(.system(.caption, design: .monospaced))
                     
                     Button(action: {
-                        if viewModel.importFromText(importText) {
+                        let count = viewModel.importFromText(importText)
+                        if count > 0 {
                             dismiss()
                         }
                     }) {

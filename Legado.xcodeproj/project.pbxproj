@@ -93,6 +93,25 @@
 		1A0000000000006A /* DataMigrationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1000000000006A /* DataMigrationManager.swift */; };
 		1A0000000000006B /* SearchOptimizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1000000000006B /* SearchOptimizer.swift */; };
 		1A0000000000006C /* ReplaceEngineEnhanced.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1000000000006C /* ReplaceEngineEnhanced.swift */; };
+		1A00000000000070 /* BookGroup+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000070 /* BookGroup+CoreDataClass.swift */; };
+		1A00000000000071 /* SearchBook+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000071 /* SearchBook+CoreDataClass.swift */; };
+		1A00000000000072 /* SearchKeyword+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000072 /* SearchKeyword+CoreDataClass.swift */; };
+		1A00000000000073 /* RssSource+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000073 /* RssSource+CoreDataClass.swift */; };
+		1A00000000000074 /* RssArticle+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000074 /* RssArticle+CoreDataClass.swift */; };
+		1A00000000000075 /* RssReadRecord+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000075 /* RssReadRecord+CoreDataClass.swift */; };
+		1A00000000000076 /* RssStar+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000076 /* RssStar+CoreDataClass.swift */; };
+		1A00000000000077 /* CacheEntry+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000077 /* CacheEntry+CoreDataClass.swift */; };
+		1A00000000000078 /* Cookie+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000078 /* Cookie+CoreDataClass.swift */; };
+		1A00000000000079 /* ReadRecord+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000079 /* ReadRecord+CoreDataClass.swift */; };
+		1A0000000000007A /* BookProgress+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1000000000007A /* BookProgress+CoreDataClass.swift */; };
+		1A0000000000007B /* HttpTTS+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1000000000007B /* HttpTTS+CoreDataClass.swift */; };
+		1A0000000000007C /* DictRule+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1000000000007C /* DictRule+CoreDataClass.swift */; };
+		1A0000000000007D /* RuleSub+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1000000000007D /* RuleSub+CoreDataClass.swift */; };
+		1A0000000000007E /* TxtTocRule+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1000000000007E /* TxtTocRule+CoreDataClass.swift */; };
+		1A0000000000007F /* BookDeduplicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1000000000007F /* BookDeduplicator.swift */; };
+		1A00000000000080 /* TableOfContentsParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000080 /* TableOfContentsParser.swift */; };
+		1A00000000000081 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000081 /* ContentView.swift */; };
+		1A00000000000082 /* Chapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000082 /* Chapter.swift */; };
 	/* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -181,6 +200,25 @@
 		1A1000000000006A /* DataMigrationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Core/Migration/DataMigrationManager.swift"; sourceTree = "<group>"; };
 		1A1000000000006B /* SearchOptimizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Core/Search/SearchOptimizer.swift"; sourceTree = "<group>"; };
 		1A1000000000006C /* ReplaceEngineEnhanced.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Core/RuleEngine/ReplaceEngineEnhanced.swift"; sourceTree = "<group>"; };
+		1A10000000000070 /* BookGroup+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BookGroup+CoreDataClass.swift"; sourceTree = "<group>"; };
+		1A10000000000071 /* SearchBook+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SearchBook+CoreDataClass.swift"; sourceTree = "<group>"; };
+		1A10000000000072 /* SearchKeyword+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SearchKeyword+CoreDataClass.swift"; sourceTree = "<group>"; };
+		1A10000000000073 /* RssSource+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RssSource+CoreDataClass.swift"; sourceTree = "<group>"; };
+		1A10000000000074 /* RssArticle+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RssArticle+CoreDataClass.swift"; sourceTree = "<group>"; };
+		1A10000000000075 /* RssReadRecord+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RssReadRecord+CoreDataClass.swift"; sourceTree = "<group>"; };
+		1A10000000000076 /* RssStar+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RssStar+CoreDataClass.swift"; sourceTree = "<group>"; };
+		1A10000000000077 /* CacheEntry+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CacheEntry+CoreDataClass.swift"; sourceTree = "<group>"; };
+		1A10000000000078 /* Cookie+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Cookie+CoreDataClass.swift"; sourceTree = "<group>"; };
+		1A10000000000079 /* ReadRecord+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ReadRecord+CoreDataClass.swift"; sourceTree = "<group>"; };
+		1A1000000000007A /* BookProgress+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BookProgress+CoreDataClass.swift"; sourceTree = "<group>"; };
+		1A1000000000007B /* HttpTTS+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HttpTTS+CoreDataClass.swift"; sourceTree = "<group>"; };
+		1A1000000000007C /* DictRule+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictRule+CoreDataClass.swift"; sourceTree = "<group>"; };
+		1A1000000000007D /* RuleSub+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RuleSub+CoreDataClass.swift"; sourceTree = "<group>"; };
+		1A1000000000007E /* TxtTocRule+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TxtTocRule+CoreDataClass.swift"; sourceTree = "<group>"; };
+		1A1000000000007F /* BookDeduplicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BookDeduplicator.swift"; sourceTree = "<group>"; };
+		1A10000000000080 /* TableOfContentsParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TableOfContentsParser.swift"; sourceTree = "<group>"; };
+		1A10000000000081 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ContentView.swift"; sourceTree = "<group>"; };
+		1A10000000000082 /* Chapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Chapter.swift"; sourceTree = "<group>"; };
 	/* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -246,6 +284,22 @@
 				1A10000000000015 /* CoreDataStack.swift */,
 				1A10000000000031 /* CloudKitSyncManager.swift */,
 				1A10000000000045 /* ReplaceRule+CoreDataClass.swift */,
+				1A10000000000070 /* BookGroup+CoreDataClass.swift */,
+				1A10000000000071 /* SearchBook+CoreDataClass.swift */,
+				1A10000000000072 /* SearchKeyword+CoreDataClass.swift */,
+				1A10000000000073 /* RssSource+CoreDataClass.swift */,
+				1A10000000000074 /* RssArticle+CoreDataClass.swift */,
+				1A10000000000075 /* RssReadRecord+CoreDataClass.swift */,
+				1A10000000000076 /* RssStar+CoreDataClass.swift */,
+				1A10000000000077 /* CacheEntry+CoreDataClass.swift */,
+				1A10000000000078 /* Cookie+CoreDataClass.swift */,
+				1A10000000000079 /* ReadRecord+CoreDataClass.swift */,
+				1A1000000000007A /* BookProgress+CoreDataClass.swift */,
+				1A1000000000007B /* HttpTTS+CoreDataClass.swift */,
+				1A1000000000007C /* DictRule+CoreDataClass.swift */,
+				1A1000000000007D /* RuleSub+CoreDataClass.swift */,
+				1A1000000000007E /* TxtTocRule+CoreDataClass.swift */,
+				1A1000000000007F /* BookDeduplicator.swift */,
 			);
 			path = Persistence;
 			sourceTree = "<group>";
@@ -308,6 +362,7 @@
 			isa = PBXGroup;
 			children = (
 				1A10000000000034 /* EPUBParser.swift */,
+				1A10000000000080 /* TableOfContentsParser.swift */,
 			);
 			path = Parser;
 			sourceTree = "<group>";
@@ -611,6 +666,25 @@
 				1A00000000000044 /* DictRuleView.swift in Sources */,
 				1A00000000000045 /* ReplaceRule+CoreDataClass.swift in Sources */,
 				1A00000000000046 /* ReplaceRuleDebugView.swift in Sources */,
+				1A00000000000070 /* BookGroup+CoreDataClass.swift in Sources */,
+				1A00000000000071 /* SearchBook+CoreDataClass.swift in Sources */,
+				1A00000000000072 /* SearchKeyword+CoreDataClass.swift in Sources */,
+				1A00000000000073 /* RssSource+CoreDataClass.swift in Sources */,
+				1A00000000000074 /* RssArticle+CoreDataClass.swift in Sources */,
+				1A00000000000075 /* RssReadRecord+CoreDataClass.swift in Sources */,
+				1A00000000000076 /* RssStar+CoreDataClass.swift in Sources */,
+				1A00000000000077 /* CacheEntry+CoreDataClass.swift in Sources */,
+				1A00000000000078 /* Cookie+CoreDataClass.swift in Sources */,
+				1A00000000000079 /* ReadRecord+CoreDataClass.swift in Sources */,
+				1A0000000000007A /* BookProgress+CoreDataClass.swift in Sources */,
+				1A0000000000007B /* HttpTTS+CoreDataClass.swift in Sources */,
+				1A0000000000007C /* DictRule+CoreDataClass.swift in Sources */,
+				1A0000000000007D /* RuleSub+CoreDataClass.swift in Sources */,
+				1A0000000000007E /* TxtTocRule+CoreDataClass.swift in Sources */,
+				1A0000000000007F /* BookDeduplicator.swift in Sources */,
+				1A00000000000080 /* TableOfContentsParser.swift in Sources */,
+				1A00000000000081 /* ContentView.swift in Sources */,
+				1A00000000000082 /* Chapter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

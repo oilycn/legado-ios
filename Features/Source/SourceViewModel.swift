@@ -142,14 +142,36 @@ class SourceViewModel: ObservableObject {
         }
     }
     
-    func importFromURL(_ urlString: String) async -> Bool {
+    func importFromURL(_ urlString: String) async -> Int {
+        let trimmed = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if let legado = parseLegadoImportLink(trimmed) {
+            if legado.src.hasPrefix("[") || legado.src.hasPrefix("{") {
+                return importFromText(legado.src)
+            }
+            return await importFromRemoteURL(legado.src, requestWithoutUA: legado.requestWithoutUA)
+        }
+
+        return await importFromRemoteURL(trimmed, requestWithoutUA: false)
+    }
+
+    private func importFromRemoteURL(_ urlString: String, requestWithoutUA: Bool) async -> Int {
         guard let url = URL(string: urlString) else {
             errorMessage = "无效的 URL"
-            return false
+            return 0
         }
-        
+
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
+            let data: Data
+            if requestWithoutUA {
+                var request = URLRequest(url: url)
+                request.setValue("null", forHTTPHeaderField: "User-Agent")
+                let (d, _) = try await URLSession.shared.data(for: request)
+                data = d
+            } else {
+                let (d, _) = try await URLSession.shared.data(from: url)
+                data = d
+            }
             if let json = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
                 return importFromJSON(json)
             }
@@ -157,17 +179,40 @@ class SourceViewModel: ObservableObject {
                 return importSingleSource(json)
             }
             errorMessage = "导入失败：不支持的 JSON 格式"
-            return false
+            return 0
         } catch {
             errorMessage = "导入失败：\(error.localizedDescription)"
-            return false
+            return 0
         }
     }
+
+    private func parseLegadoImportLink(_ input: String) -> (src: String, requestWithoutUA: Bool)? {
+        guard let url = URL(string: input), url.scheme == "legado" else {
+            return nil
+        }
+
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let srcItem = components.queryItems?.first(where: { $0.name == "src" }),
+              let srcValue = srcItem.value, !srcValue.isEmpty else {
+            return nil
+        }
+
+        let decoded = srcValue.removingPercentEncoding ?? srcValue
+        var src = decoded.trimmingCharacters(in: .whitespacesAndNewlines)
+        var requestWithoutUA = false
+        if src.hasSuffix("#requestWithoutUA") {
+            requestWithoutUA = true
+            src = String(src.dropLast("#requestWithoutUA".count))
+        }
+
+        if src.isEmpty { return nil }
+        return (src: src, requestWithoutUA: requestWithoutUA)
+    }
     
-    func importFromText(_ text: String) -> Bool {
+    func importFromText(_ text: String) -> Int {
         guard let data = text.data(using: .utf8) else {
             errorMessage = "无效的文本"
-            return false
+            return 0
         }
         
         do {
@@ -177,48 +222,113 @@ class SourceViewModel: ObservableObject {
                 return importSingleSource(json)
             }
             errorMessage = "导入失败：不支持的 JSON 格式"
-            return false
+            return 0
         } catch {
             errorMessage = "解析 JSON 失败：\(error.localizedDescription)"
-            return false
+            return 0
         }
     }
     
-    private func importFromJSON(_ sources: [[String: Any]]) -> Bool {
+    private func importFromJSON(_ sources: [[String: Any]]) -> Int {
         let context = CoreDataStack.shared.viewContext
-        
+
+        var importedCount = 0
         for sourceData in sources {
+            guard let url = sourceData["bookSourceUrl"] as? String, !url.isEmpty,
+                  let name = sourceData["bookSourceName"] as? String, !name.isEmpty else {
+                continue
+            }
+
             let source = findOrCreateSource(for: sourceData, in: context)
+            source.bookSourceUrl = url
+            source.bookSourceName = name
             applySourceData(source, sourceData)
+            importedCount += 1
         }
         
         do {
             try CoreDataStack.shared.save()
             Task { await loadSources() }
-            return true
+            return importedCount
         } catch {
             context.rollback()
             errorMessage = "导入失败：\(error.localizedDescription)"
             Task { await loadSources() }
-            return false
+            return 0
         }
     }
     
-    private func importSingleSource(_ sourceData: [String: Any]) -> Bool {
+    private func importSingleSource(_ sourceData: [String: Any]) -> Int {
         let context = CoreDataStack.shared.viewContext
+        guard let url = sourceData["bookSourceUrl"] as? String, !url.isEmpty,
+              let name = sourceData["bookSourceName"] as? String, !name.isEmpty else {
+            errorMessage = "导入失败：书源数据缺少必要字段"
+            return 0
+        }
+
         let source = findOrCreateSource(for: sourceData, in: context)
+        source.bookSourceUrl = url
+        source.bookSourceName = name
         applySourceData(source, sourceData)
 
         do {
             try CoreDataStack.shared.save()
             Task { await loadSources() }
-            return true
+            return 1
         } catch {
             context.rollback()
             errorMessage = "导入失败：\(error.localizedDescription)"
             Task { await loadSources() }
-            return false
+            return 0
         }
+    }
+
+    private func int32Value(_ value: Any?) -> Int32? {
+        switch value {
+        case let n as NSNumber:
+            return n.int32Value
+        case let i as Int:
+            return Int32(i)
+        case let s as String:
+            return Int32(s.trimmingCharacters(in: .whitespacesAndNewlines))
+        default:
+            return nil
+        }
+    }
+
+    private func int64Value(_ value: Any?) -> Int64? {
+        switch value {
+        case let n as NSNumber:
+            return n.int64Value
+        case let i as Int:
+            return Int64(i)
+        case let s as String:
+            return Int64(s.trimmingCharacters(in: .whitespacesAndNewlines))
+        default:
+            return nil
+        }
+    }
+
+    private func boolValue(_ value: Any?) -> Bool? {
+        switch value {
+        case let b as Bool:
+            return b
+        case let n as NSNumber:
+            return n.boolValue
+        case let s as String:
+            let v = s.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            if ["true", "1", "yes", "y"].contains(v) { return true }
+            if ["false", "0", "no", "n"].contains(v) { return false }
+            return nil
+        default:
+            return nil
+        }
+    }
+
+    private func jsonDataValue(_ value: Any?) -> Data? {
+        guard let value else { return nil }
+        guard JSONSerialization.isValidJSONObject(value) else { return nil }
+        return try? JSONSerialization.data(withJSONObject: value)
     }
 
     private func findOrCreateSource(for data: [String: Any], in context: NSManagedObjectContext) -> BookSource {
@@ -247,59 +357,51 @@ class SourceViewModel: ObservableObject {
     }
     
     private func applySourceData(_ source: BookSource, _ data: [String: Any]) {
-        source.bookSourceName = data["bookSourceName"] as? String ?? ""
-        source.bookSourceUrl = data["bookSourceUrl"] as? String ?? ""
         source.bookSourceGroup = data["bookSourceGroup"] as? String
-        source.bookSourceType = data["bookSourceType"] as? Int32 ?? 0
+        if let v = int32Value(data["bookSourceType"]) { source.bookSourceType = v }
+        if let v = int32Value(data["customOrder"]) { source.customOrder = v }
+        if let v = boolValue(data["enabled"]) { source.enabled = v }
+        if let v = boolValue(data["enabledExplore"]) { source.enabledExplore = v }
+        if let v = boolValue(data["enabledCookieJar"]) { source.enabledCookieJar = v }
+        if let v = int32Value(data["weight"]) { source.weight = v }
+        if let v = int64Value(data["respondTime"]) { source.respondTime = v }
+        if let v = int64Value(data["lastUpdateTime"]) { source.lastUpdateTime = v }
+
+        source.bookUrlPattern = data["bookUrlPattern"] as? String
+        source.concurrentRate = data["concurrentRate"] as? String
+        source.header = data["header"] as? String
+        source.loginUrl = data["loginUrl"] as? String
+        source.loginUi = data["loginUi"] as? String
+        source.loginCheckJs = data["loginCheckJs"] as? String
+        source.coverDecodeJs = data["coverDecodeJs"] as? String
+        source.jsLib = data["jsLib"] as? String
+
+        source.bookSourceComment = data["bookSourceComment"] as? String
+        source.variableComment = data["variableComment"] as? String
+        source.variable = data["variable"] as? String
+
         source.searchUrl = data["searchUrl"] as? String
         source.exploreUrl = data["exploreUrl"] as? String
-        
-        // 保存规则 JSON
-        if let ruleSearch = data["ruleSearch"] {
-            source.ruleSearchData = try? JSONSerialization.data(withJSONObject: ruleSearch)
-        }
-        if let ruleContent = data["ruleContent"] {
-            source.ruleContentData = try? JSONSerialization.data(withJSONObject: ruleContent)
-        }
-        if let ruleBookInfo = data["ruleBookInfo"] {
-            source.ruleBookInfoData = try? JSONSerialization.data(withJSONObject: ruleBookInfo)
-        }
-        if let ruleToc = data["ruleToc"] {
-            source.ruleTocData = try? JSONSerialization.data(withJSONObject: ruleToc)
-        }
+        source.exploreScreen = data["exploreScreen"] as? String
+
+        if let v = jsonDataValue(data["ruleSearch"]) { source.ruleSearchData = v }
+        if let v = jsonDataValue(data["ruleExplore"]) { source.ruleExploreData = v }
+        if let v = jsonDataValue(data["ruleBookInfo"]) { source.ruleBookInfoData = v }
+        if let v = jsonDataValue(data["ruleToc"]) { source.ruleTocData = v }
+        if let v = jsonDataValue(data["ruleContent"]) { source.ruleContentData = v }
+        if let v = jsonDataValue(data["ruleReview"]) { source.ruleReviewData = v }
     }
     
-    func exportAllSources() {
-        let sources = sources.map { source -> [String: Any] in
-            var dict: [String: Any] = [
-                "bookSourceName": source.bookSourceName,
-                "bookSourceUrl": source.bookSourceUrl
-            ]
-            
-            if let group = source.bookSourceGroup {
-                dict["bookSourceGroup"] = group
-            }
-            
-            dict["bookSourceType"] = source.bookSourceType
-            dict["searchUrl"] = source.searchUrl
-            dict["exploreUrl"] = source.exploreUrl
-            
-            // 导出规则
-            if let searchData = source.ruleSearchData,
-               let searchJson = try? JSONSerialization.jsonObject(with: searchData) {
-                dict["ruleSearch"] = searchJson
-            }
-            
-            if let contentData = source.ruleContentData,
-               let contentJson = try? JSONSerialization.jsonObject(with: contentData) {
-                dict["ruleContent"] = contentJson
-            }
-            
-            return dict
+    func exportAllSources() -> Data? {
+        let exportSources = sources.map { ExportableSource(from: $0) }
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        do {
+            return try encoder.encode(exportSources)
+        } catch {
+            errorMessage = "导出失败：\(error.localizedDescription)"
+            return nil
         }
-        
-        // TODO: 导出为文件
-        print("导出 \(sources.count) 个书源")
     }
 }
 

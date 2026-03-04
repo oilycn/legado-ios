@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import WebKit
 
 /// URL 解析结果
 struct AnalyzedUrl {
@@ -218,6 +219,12 @@ class AnalyzeUrl {
                 request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
             }
         }
+
+        if analyzedUrl.webView {
+            let fetcher = WebViewHTMLFetcher()
+            let result = try await fetcher.fetchHTML(request: request, timeout: request.timeoutInterval)
+            return (result.html, result.finalURL)
+        }
         
         let (data, response) = try await URLSession.shared.data(for: request)
         
@@ -281,5 +288,110 @@ class AnalyzeUrl {
         
         // 4. 默认 UTF-8
         return .utf8
+    }
+}
+
+@MainActor
+private final class WebViewHTMLFetcher: NSObject, WKNavigationDelegate {
+    private var continuation: CheckedContinuation<(html: String, finalURL: String), Error>?
+    private var webView: WKWebView?
+    private var timeoutTask: Task<Void, Never>?
+    private var requestedURL: URL?
+
+    func fetchHTML(request: URLRequest, timeout: TimeInterval) async throws -> (html: String, finalURL: String) {
+        if continuation != nil {
+            throw WebViewFetchError.invalidState
+        }
+
+        requestedURL = request.url
+
+        return try await withCheckedThrowingContinuation { cont in
+            continuation = cont
+
+            let config = WKWebViewConfiguration()
+            config.websiteDataStore = .default()
+
+            let webView = WKWebView(frame: .zero, configuration: config)
+            self.webView = webView
+            webView.navigationDelegate = self
+            webView.load(request)
+
+            timeoutTask = Task { [weak self] in
+                let nanos = UInt64(max(1.0, timeout) * 1_000_000_000)
+                try? await Task.sleep(nanoseconds: nanos)
+                await MainActor.run {
+                    self?.finish(.failure(WebViewFetchError.timeout))
+                }
+            }
+        }
+    }
+
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        Task { @MainActor in
+            do {
+                try await Task.sleep(nanoseconds: 150_000_000)
+            } catch {
+            }
+
+            webView.evaluateJavaScript("document.documentElement.outerHTML") { [weak self] result, error in
+                guard let self else { return }
+                Task { @MainActor in
+                    if let error {
+                        self.finish(.failure(error))
+                        return
+                    }
+                    guard let html = result as? String, !html.isEmpty else {
+                        self.finish(.failure(WebViewFetchError.noHTML))
+                        return
+                    }
+                    let finalURL = webView.url?.absoluteString ?? self.requestedURL?.absoluteString ?? ""
+                    self.finish(.success((html: html, finalURL: finalURL)))
+                }
+            }
+        }
+    }
+
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        finish(.failure(error))
+    }
+
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        finish(.failure(error))
+    }
+
+    private func finish(_ result: Result<(html: String, finalURL: String), Error>) {
+        guard let continuation else { return }
+        self.continuation = nil
+
+        timeoutTask?.cancel()
+        timeoutTask = nil
+
+        webView?.navigationDelegate = nil
+        webView = nil
+        requestedURL = nil
+
+        switch result {
+        case .success(let value):
+            continuation.resume(returning: value)
+        case .failure(let error):
+            continuation.resume(throwing: error)
+        }
+    }
+}
+
+private enum WebViewFetchError: LocalizedError {
+    case timeout
+    case noHTML
+    case invalidState
+
+    var errorDescription: String? {
+        switch self {
+        case .timeout:
+            return "WebView 加载超时"
+        case .noHTML:
+            return "WebView 未返回 HTML"
+        case .invalidState:
+            return "WebView 请求状态异常"
+        }
     }
 }

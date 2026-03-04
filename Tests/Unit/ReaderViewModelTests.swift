@@ -118,6 +118,30 @@ final class ReaderViewModelTests: XCTestCase {
         XCTAssertEqual(book.durChapterPos, 1000)
         XCTAssertEqual(book.durChapterTitle, "第五章")
     }
+
+    func testPagingProgressUpdatesDurChapterPos() async throws {
+        let book = Book.create(in: context)
+        book.name = "测试书籍"
+
+        let chapter = BookChapter.create(
+            in: context,
+            bookId: book.bookId,
+            url: "chapter_1",
+            index: 0,
+            title: "第一章"
+        )
+
+        try context.save()
+
+        viewModel.currentBook = book
+        viewModel.currentChapter = chapter
+        viewModel.currentChapterIndex = 0
+
+        viewModel.currentPageIndex = 5
+
+        XCTAssertEqual(viewModel.durChapterPos, 5)
+        XCTAssertEqual(book.durChapterPos, 5)
+    }
     
     /// 测试字体大小调整
     func testFontSizeAdjustment() async {

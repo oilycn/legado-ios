@@ -105,21 +105,46 @@ class SearchViewModel: ObservableObject {
     }
     
     // MARK: - 添加到书架
-    func addToBookshelf(result: SearchResult) async throws {
+    func addToBookshelf(result: SearchResult) async throws -> Book {
         let context = CoreDataStack.shared.viewContext
+
+        if let existing = findBook(bookUrl: result.bookUrl, origin: result.sourceId.uuidString, in: context) {
+            existing.name = result.name
+            existing.author = result.author
+            existing.coverUrl = result.coverUrl
+            existing.intro = result.intro
+            existing.originName = result.sourceName
+            existing.updatedAt = Date()
+            try CoreDataStack.shared.save()
+            return existing
+        }
+
         let book = Book.create(in: context)
-        
         book.name = result.name
         book.author = result.author
         book.coverUrl = result.coverUrl
-        book.intro = "..."
+        book.intro = result.intro
         book.bookUrl = result.bookUrl
         book.tocUrl = ""
         book.origin = result.sourceId.uuidString
         book.originName = result.sourceName
-        book.type = 0
-        
+
+        let sourceRequest: NSFetchRequest<BookSource> = BookSource.fetchRequest()
+        sourceRequest.fetchLimit = 1
+        sourceRequest.predicate = NSPredicate(format: "sourceId == %@", result.sourceId as CVarArg)
+        if let source = try? context.fetch(sourceRequest).first {
+            book.source = source
+        }
+
         try CoreDataStack.shared.save()
+        return book
+    }
+
+    private func findBook(bookUrl: String, origin: String, in context: NSManagedObjectContext) -> Book? {
+        let request: NSFetchRequest<Book> = Book.fetchRequest()
+        request.fetchLimit = 1
+        request.predicate = NSPredicate(format: "bookUrl == %@ AND origin == %@", bookUrl, origin)
+        return try? context.fetch(request).first
     }
 }
 

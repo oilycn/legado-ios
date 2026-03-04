@@ -14,15 +14,16 @@ struct LegadoApp: App {
     let modelContainer: ModelContainer
     
     init() {
+        let schema = Schema([
+            Book.self,
+            BookSource.self,
+            Chapter.self,
+            Bookmark.self,
+            Highlight.self,
+            ReadRecord.self
+        ])
+
         do {
-            let schema = Schema([
-                Book.self,
-                BookSource.self,
-                Chapter.self,
-                Bookmark.self,
-                Highlight.self,
-                ReadRecord.self
-            ])
             let modelConfiguration = ModelConfiguration(
                 schema: schema,
                 isStoredInMemoryOnly: false,
@@ -33,7 +34,13 @@ struct LegadoApp: App {
                 configurations: [modelConfiguration]
             )
         } catch {
-            fatalError("Failed to create model container: \(error)")
+            assertionFailure("Failed to create model container: \(error)")
+            do {
+                let fallback = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+                modelContainer = try ModelContainer(for: schema, configurations: [fallback])
+            } catch {
+                preconditionFailure("Failed to create fallback model container: \(error)")
+            }
         }
     }
     
