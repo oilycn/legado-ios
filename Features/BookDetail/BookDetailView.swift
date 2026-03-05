@@ -125,6 +125,7 @@ struct BookDetailView: View {
         .task {
             await viewModel.loadChapters()
         }
+    }
     
     // MARK: - 书籍头部
     private var bookHeader: some View {
