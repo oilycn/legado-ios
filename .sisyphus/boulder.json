@@ -1,0 +1,35 @@
+{
+  "active_plan": "D:/soft/legado-ios/.sisyphus/plans/legado-ios-full-port.md",
+  "started_at": "2026-03-04T09:07:00.000Z",
+  "session_ids": ["ses_35ae94627ffewtp3BumdSXLwBJ"],
+  "plan_name": "legado-ios-full-port",
+  "swift_file_count": 133,
+  "phases_completed": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+  "status": "implementation_complete",
+  "completed_at": "2026-03-04T10:00:00.000Z"
+}
+  "active_plan": "D:/soft/legado-ios/.sisyphus/plans/legado-ios-full-port.md",
+  "started_at": "2026-03-04T09:07:00.000Z",
+  "session_ids": ["ses_35ae94627ffewtp3BumdSXLwBJ"],
+  "plan_name": "legado-ios-full-port",
+  "phase_0_completed": "2026-03-04T09:15:00.000Z",
+  "phase_1_completed": "2026-03-04T09:25:00.000Z",
+  "phase_2_completed": "2026-03-04T09:35:00.000Z",
+  "phase_3_completed": "2026-03-04T09:40:00.000Z",
+  "phase_4_completed": "2026-03-04T09:45:00.000Z",
+  "phase_6_completed": "2026-03-04T09:50:00.000Z",
+  "phase_8_completed": "2026-03-04T09:55:00.000Z",
+  "swift_file_count": 100,
+  "status": "phases_0_to_8_completed"
+}
+  "active_plan": "D:/soft/legado-ios/.sisyphus/plans/legado-ios-full-port.md",
+  "started_at": "2026-03-04T09:07:00.000Z",
+  "session_ids": ["ses_35ae94627ffewtp3BumdSXLwBJ"],
+  "plan_name": "legado-ios-full-port",
+  "phase_0_completed": "2026-03-04T09:15:00.000Z"
+}
+  "active_plan": "D:/soft/legado-ios/.sisyphus/plans/legado-ios-full-port.md",
+  "started_at": "2026-03-04T09:07:00.000Z",
+  "session_ids": ["ses_35ae94627ffewtp3BumdSXLwBJ"],
+  "plan_name": "legado-ios-full-port"
+}

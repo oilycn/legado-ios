@@ -14,7 +14,8 @@ struct ReaderView: View {
     @StateObject private var ttsManager = TTSManager()
     @StateObject private var autoPageTurnManager = AutoPageTurnManager()
     @StateObject private var readingEnhancementManager = ReadingEnhancementManager()
-
+    @StateObject private var textSelectionCoordinator = TextSelectionCoordinator()
+    
     @State private var showingSettings = false
     @State private var showingChapterList = false
     @State private var showingTTSControls = false
@@ -22,6 +23,15 @@ struct ReaderView: View {
     @State private var showingChangeSource = false
     @State private var showingBookmarks = false
     @State private var showUI = true
+    
+    // Phase 1 新增状态
+    @State private var showingBrightness = false
+    @State private var showingBgTextConfig = false
+    @State private var showingReadStyle = false
+    @State private var showingTipConfig = false
+    @State private var showingContentEdit = false
+    @State private var showingEffectiveReplaces = false
+    @State private var hideTimer: Timer?
     
     let book: Book
     
@@ -36,6 +46,7 @@ struct ReaderView: View {
                 PagedReaderView(viewModel: viewModel) {
                     autoPageTurnManager.handleTouch()
                     withAnimation { showUI.toggle() }
+                    resetHideTimer()
                 }
                 
                 // 顶部工具栏
@@ -52,7 +63,9 @@ struct ReaderView: View {
                         onBookmarks: { showingBookmarks = true },
                         onTTS: { showingTTSControls = true },
                         onAutoPage: { showingAutoPageTurn = true },
-                        onSettings: { showingSettings = true }
+                        onSettings: { showingSettings = true },
+                        onContentEdit: { showingContentEdit = true },
+                        onReplaces: { showingEffectiveReplaces = true }
                     )
                     .opacity(showUI ? 1.0 : 0.0)
                     .animation(.easeInOut, value: showUI)
@@ -65,7 +78,10 @@ struct ReaderView: View {
                         totalChapters: viewModel.totalChapters,
                         onPrevChapter: { Task { await viewModel.prevChapter() } },
                         onNextChapter: { Task { await viewModel.nextChapter() } },
-                        onSliderChange: { viewModel.jumpToChapter($0) }
+                        onSliderChange: { viewModel.jumpToChapter($0) },
+                        onBrightness: { showingBrightness = true },
+                        onBgTextConfig: { showingBgTextConfig = true },
+                        onReadStyle: { showingReadStyle = true }
                     )
                     .opacity(showUI ? 1.0 : 0.0)
                     .animation(.easeInOut, value: showUI)
@@ -76,18 +92,82 @@ struct ReaderView: View {
                     ReaderSettingsView(viewModel: viewModel, isPresented: $showingSettings)
                         .transition(.move(edge: .bottom))
                 }
-
+                
                 if showingTTSControls {
                     TTSControlsView(ttsManager: ttsManager, viewModel: viewModel, isPresented: $showingTTSControls)
                         .transition(.opacity)
                 }
-
+                
                 if showingAutoPageTurn {
                     AutoPageTurnControlsView(manager: autoPageTurnManager, isPresented: $showingAutoPageTurn)
                         .transition(.opacity)
                 }
-
+                
+                // Phase 1 新增 Sheet
+                if showingBrightness {
+                    BrightnessSlider(isPresented: $showingBrightness)
+                        .transition(.opacity)
+                }
+                
+                if showingBgTextConfig {
+                    BgTextConfigSheet(isPresented: $showingBgTextConfig, viewModel: viewModel)
+                        .transition(.move(edge: .bottom))
+                }
+                
+                if showingReadStyle {
+                    ReadStyleSheet(isPresented: $showingReadStyle, viewModel: viewModel)
+                        .transition(.move(edge: .bottom))
+                }
+                
+                if showingContentEdit, let chapter = viewModel.currentChapter {
+                    ContentEditSheet(isPresented: $showingContentEdit, chapter: chapter) {
+                        Task { await viewModel.loadCurrentChapter() }
+                    }
+                }
+                
+                if showingEffectiveReplaces {
+                    EffectiveReplacesSheet(isPresented: $showingEffectiveReplaces, bookSourceUrl: book.origin)
+                }
+                
                 AutoPageTurnOverlay(manager: autoPageTurnManager)
+                
+                // 文本选择菜单
+                if textSelectionCoordinator.showMenu {
+                    TextActionMenu(
+                        selectedText: textSelectionCoordinator.selectedText,
+                        chapterIndex: textSelectionCoordinator.chapterIndex,
+                        positionInChapter: textSelectionCoordinator.positionInChapter,
+                        onCopy: {},
+                        onBookmark: {
+                            // 创建书签
+                            let context = CoreDataStack.shared.viewContext
+                            let bookmark = Bookmark(context: context)
+                            bookmark.bookmarkId = UUID()
+                            bookmark.bookId = book.bookId
+                            bookmark.chapterIndex = Int32(textSelectionCoordinator.chapterIndex)
+                            bookmark.chapterTitle = viewModel.currentChapter?.title ?? ""
+                            bookmark.content = textSelectionCoordinator.selectedText
+                            bookmark.createDate = Date()
+                            try? context.save()
+                        },
+                        onSearch: {},
+                        onDictionary: {
+                            textSelectionCoordinator.showDictionaryForWord(textSelectionCoordinator.selectedText)
+                        },
+                        onDismiss: {
+                            textSelectionCoordinator.hideMenu()
+                        }
+                    )
+                    .position(x: textSelectionCoordinator.selectionRect.midX,
+                              y: textSelectionCoordinator.selectionRect.minY - 40)
+                    .transition(.opacity)
+                }
+                
+                // 字典视图
+                if textSelectionCoordinator.showDictionary {
+                    DictionaryLookupView(word: textSelectionCoordinator.dictionaryWord)
+                        .ignoresSafeArea()
+                }
                 
                 // 加载指示器
                 if viewModel.isLoading {
@@ -113,7 +193,6 @@ struct ReaderView: View {
             }
             .onTapGesture {
                 // 点击手势由 PagedReaderView 内部处理
-                // 仅在滚动模式下由外层处理
             }
             .onAppear {
                 viewModel.loadBook(book)
@@ -127,12 +206,14 @@ struct ReaderView: View {
                     viewModel.applyTheme(isNight ? .dark : .light)
                 }
                 readingEnhancementManager.startReadingSession()
+                startHideTimer()
             }
             .onDisappear {
                 viewModel.saveProgress()
                 ttsManager.stop()
                 autoPageTurnManager.stop()
                 readingEnhancementManager.endReadingSession()
+                hideTimer?.invalidate()
             }
             .onChange(of: viewModel.currentPageIndex) { _ in
                 autoPageTurnManager.reset()
@@ -156,7 +237,6 @@ struct ReaderView: View {
             }
             .sheet(isPresented: $showingChangeSource) {
                 ChangeSourceSheet(isPresented: $showingChangeSource, book: book) {
-                    // 换源成功后重新加载
                     viewModel.loadBook(book)
                 }
             }
@@ -166,6 +246,21 @@ struct ReaderView: View {
         }
         .navigationBarHidden(true)
         .statusBar(hidden: !showUI)
+    }
+    
+    // MARK: - 自动隐藏定时器
+    
+    private func startHideTimer() {
+        hideTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { _ in
+            withAnimation {
+                showUI = false
+            }
+        }
+    }
+    
+    private func resetHideTimer() {
+        hideTimer?.invalidate()
+        startHideTimer()
     }
 }
 
@@ -180,6 +275,8 @@ struct ReaderTopBar: View {
     let onTTS: () -> Void
     let onAutoPage: () -> Void
     let onSettings: () -> Void
+    let onContentEdit: () -> Void
+    let onReplaces: () -> Void
     
     var body: some View {
         HStack {
@@ -199,33 +296,34 @@ struct ReaderTopBar: View {
             
             Spacer()
             
-            Button(action: onChapterList) {
-                Image(systemName: "list.bullet")
-                    .font(.title2)
-            }
-
-            Button(action: onChangeSource) {
-                Image(systemName: "arrow.triangle.2.circlepath")
-                    .font(.title2)
-            }
-
-            Button(action: onBookmarks) {
-                Image(systemName: "bookmark")
-                    .font(.title2)
-            }
-
-            Button(action: onTTS) {
-                Image(systemName: "speaker.wave.2")
-                    .font(.title2)
-            }
-
-            Button(action: onAutoPage) {
-                Image(systemName: "timer")
-                    .font(.title2)
-            }
-            
-            Button(action: onSettings) {
-                Image(systemName: "a.square")
+            Menu {
+                Button(action: onChapterList) {
+                    Label("目录", systemImage: "list.bullet")
+                }
+                Button(action: onChangeSource) {
+                    Label("换源", systemImage: "arrow.triangle.2.circlepath")
+                }
+                Button(action: onBookmarks) {
+                    Label("书签", systemImage: "bookmark")
+                }
+                Button(action: onContentEdit) {
+                    Label("编辑内容", systemImage: "pencil")
+                }
+                Button(action: onReplaces) {
+                    Label("替换规则", systemImage: "text.badge.checkmark")
+                }
+                Divider()
+                Button(action: onTTS) {
+                    Label("朗读", systemImage: "speaker.wave.2")
+                }
+                Button(action: onAutoPage) {
+                    Label("自动翻页", systemImage: "timer")
+                }
+                Button(action: onSettings) {
+                    Label("设置", systemImage: "a.square")
+                }
+            } label: {
+                Image(systemName: "ellipsis.circle")
                     .font(.title2)
             }
         }
@@ -242,6 +340,9 @@ struct ReaderBottomBar: View {
     let onPrevChapter: () -> Void
     let onNextChapter: () -> Void
     let onSliderChange: (Int) -> Void
+    let onBrightness: () -> Void
+    let onBgTextConfig: () -> Void
+    let onReadStyle: () -> Void
     
     @State private var sliderValue: Double = 0
     
@@ -279,6 +380,33 @@ struct ReaderBottomBar: View {
                 .disabled(currentChapter >= totalChapters - 1)
             }
             .padding(.horizontal)
+            
+            // 新增按钮行
+            HStack(spacing: 20) {
+                Button(action: onBrightness) {
+                    VStack(spacing: 2) {
+                        Image(systemName: "sun.max")
+                        Text("亮度")
+                            .font(.caption2)
+                    }
+                }
+                
+                Button(action: onBgTextConfig) {
+                    VStack(spacing: 2) {
+                        Image(systemName: "paintpalette")
+                        Text("背景")
+                            .font(.caption2)
+                    }
+                }
+                
+                Button(action: onReadStyle) {
+                    VStack(spacing: 2) {
+                        Image(systemName: "textformat.size")
+                        Text("样式")
+                            .font(.caption2)
+                    }
+                }
+            }
         }
         .padding()
         .background(Color.black.opacity(0.3))
@@ -289,7 +417,6 @@ struct ReaderBottomBar: View {
 }
 
 // MARK: - 旧分页视图（保留向后兼容）
-/// @available(*, deprecated, message: "请使用 PagedReaderView")
 struct ReaderPageView: View {
     @ObservedObject var viewModel: ReaderViewModel
     
