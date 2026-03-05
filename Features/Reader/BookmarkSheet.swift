@@ -172,7 +172,7 @@ struct BookmarkRow: View {
                     
                     Text(formattedDate)
                         .font(.caption2)
-                        .foregroundColor(.tertiary)
+                        .foregroundColor(.secondary)
                 }
                 
                 Spacer()

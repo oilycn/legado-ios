@@ -87,6 +87,13 @@ class ChangeSourceViewModel: ObservableObject {
                     if let matchedBook = matched {
                         let result = ChangeSourceResult(
                             source: source,
+                            latestChapter: matchedBook.lastChapter ?? "未知",
+                            chapterCount: 0,
+                            bookUrl: matchedBook.bookUrl,
+                            tocUrl: "",
+                            isCurrentSource: isCurrentSource
+                        )
+                            source: source,
                             latestChapter: matchedBook.latestChapterTitle ?? "未知",
                             chapterCount: Int(matchedBook.totalChapterNum),
                             bookUrl: matchedBook.bookUrl,

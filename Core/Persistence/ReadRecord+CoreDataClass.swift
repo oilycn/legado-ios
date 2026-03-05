@@ -2,6 +2,15 @@
 //  ReadRecord+CoreDataClass.swift
 //  Legado-iOS
 //
+//  阅读记录实体
+//
+
+import Foundation
+import CoreData
+import UIKit
+//  ReadRecord+CoreDataClass.swift
+//  Legado-iOS
+//
 //  阅读记录实体 — 对标 Android ReadRecord
 //
 

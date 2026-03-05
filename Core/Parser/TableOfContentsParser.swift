@@ -123,7 +123,7 @@ class TableOfContentsParser {
     
     /// 解析下一页 URL
     static func parseNextPageURL(from html: String, rule: RuleToc, baseURL: String) -> String? {
-        guard let nextPageRule = rule.nextPageToc,
+        guard let nextPageRule = rule.nextTocUrl,
               !nextPageRule.isEmpty,
               let nextURL = try? RuleParser.parse(html: html, rule: nextPageRule) else {
             return nil
@@ -242,7 +242,7 @@ class TableOfContentsService {
         var allChapters = accumulated + chapters
         
         // 检查是否有下一页
-        if let nextPageURL = TableOfContentsParser.parseNextPageURL(from: html, ruleToc: ruleToc, baseURL: url) {
+        if let nextPageURL = TableOfContentsParser.parseNextPageURL(from: html, rule: ruleToc, baseURL: url) {
             // 递归获取下一页
             allChapters = try await parseTOCPage(
                 url: nextPageURL,
