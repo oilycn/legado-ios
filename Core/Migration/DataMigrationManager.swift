@@ -402,7 +402,6 @@ class DataMigrationManager: ObservableObject {
             "chapterIndex": bookmark.chapterIndex
         ]
     }
-    }
 
     private func exportRule(_ rule: ReplaceRule) -> [String: Any] {
         return [

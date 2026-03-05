@@ -91,33 +91,7 @@ class ReadingEnhancementManager: ObservableObject {
         setupNotifications()
     }
     
-    nonisolated deinit {
-        // 清理通知观察者
-        NotificationCenter.default.removeObserver(self)
-        // 停止定时器
-        readingTimer?.invalidate()
-        nightModeTimer?.invalidate()
-        volumeObserver = nil
-        // 恢复屏幕设置
-        Task { @MainActor in
-            UIApplication.shared.isIdleTimerDisabled = false
-        }
-    }
 
-        // 清理通知观察者
-        NotificationCenter.default.removeObserver(self)
-        // 停止定时器
-        readingTimer?.invalidate()
-        nightModeTimer?.invalidate()
-        volumeObserver = nil
-        // 恢复屏幕设置
-        Task { @MainActor in
-            UIApplication.shared.isIdleTimerDisabled = false
-        }
-    }
-        cleanup()
-    }
-    
     // MARK: - 公开方法
     
     /// 开始阅读会话

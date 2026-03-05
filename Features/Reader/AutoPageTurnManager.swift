@@ -85,17 +85,7 @@ class AutoPageTurnManager: ObservableObject {
         loadConfig()
     }
     
-    nonisolated deinit {
-        timer?.invalidate()
-        timer = nil
-    }
 
-        timer?.invalidate()
-        timer = nil
-    }
-        stop()
-    }
-    
     // MARK: - 公开方法
     
     /// 开始自动翻页
