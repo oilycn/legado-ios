@@ -85,7 +85,14 @@ class AutoPageTurnManager: ObservableObject {
         loadConfig()
     }
     
-    deinit {
+    nonisolated deinit {
+        timer?.invalidate()
+        timer = nil
+    }
+
+        timer?.invalidate()
+        timer = nil
+    }
         stop()
     }
     
@@ -103,12 +110,13 @@ class AutoPageTurnManager: ObservableObject {
         accumulatedTime = 0
         startTime = Date()
         
-        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
-            Task { @MainActor in
+        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
+            Task { @MainActor [weak self] in
                 self?.updateProgress()
             }
         }
     }
+
     
     /// 停止自动翻页
     func stop() {
@@ -144,12 +152,13 @@ class AutoPageTurnManager: ObservableObject {
         pausedTime = nil
         state = .countdown(remainingSeconds)
         
-        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
-            Task { @MainActor in
+        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
+            Task { @MainActor [weak self] in
                 self?.updateProgress()
             }
         }
     }
+
     
     /// 切换状态
     func toggle() {

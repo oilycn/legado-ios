@@ -6,9 +6,32 @@
 //
 
 import Foundation
+import CoreData
+
+// MARK: - 目录规则结构体
+struct RuleToc: Codable {
+    var chapterList: String?
+    var chapterName: String?
+    var chapterUrl: String?
+    var nextTocUrl: String?
+    var updateTime: String?
+}
+
+// MARK: - 规则解析器占位
+class RuleParser {
+    static func parse(html: String, rule: String) throws -> String {
+        // 简化实现：返回原始HTML或按规则提取
+        if rule.isEmpty {
+            return html
+        }
+        // TODO: 实现完整的规则解析
+        return html
+    }
+}
 
 /// 目录解析器
 class TableOfContentsParser {
+
     
     struct ChapterInfo {
         let title: String
@@ -17,7 +40,7 @@ class TableOfContentsParser {
     }
     
     /// 从书源解析目录
-    static func parse(from html: String, ruleToc: BookSource.RuleToc) async throws -> [ChapterInfo] {
+    static func parse(from html: String, ruleToc: RuleToc) async throws -> [ChapterInfo] {
         var chapters: [ChapterInfo] = []
         
         // 1. 提取章节列表 HTML
@@ -44,7 +67,7 @@ class TableOfContentsParser {
     }
     
     /// 提取章节元素列表
-    private static func extractChapterElements(from html: String, rule: BookSource.RuleToc) -> [String] {
+    private static func extractChapterElements(from html: String, rule: RuleToc) -> [String] {
         var elements: [String] = []
         
         // 使用 chapterList 规则或默认的 <a> 标签
@@ -73,7 +96,7 @@ class TableOfContentsParser {
     }
     
     /// 解析单个章节
-    private static func parseChapter(from element: String, rule: BookSource.RuleToc, index: Int) -> ChapterInfo? {
+    private static func parseChapter(from element: String, rule: RuleToc, index: Int) -> ChapterInfo? {
         // 提取 URL
         let urlPattern = #"href="([^"]+)""#
         guard let url = extractFirstMatch(in: element, pattern: urlPattern) else {
@@ -99,7 +122,7 @@ class TableOfContentsParser {
     }
     
     /// 解析下一页 URL
-    static func parseNextPageURL(from html: String, rule: BookSource.RuleToc, baseURL: String) -> String? {
+    static func parseNextPageURL(from html: String, rule: RuleToc, baseURL: String) -> String? {
         guard let nextPageRule = rule.nextPageToc,
               !nextPageRule.isEmpty,
               let nextURL = try? RuleParser.parse(html: html, rule: nextPageRule) else {
@@ -110,7 +133,7 @@ class TableOfContentsParser {
     }
     
     /// 解析章节更新时间
-    static func parseUpdateTime(from html: String, rule: BookSource.RuleToc) -> Date? {
+    static func parseUpdateTime(from html: String, rule: RuleToc) -> Date? {
         guard let updateRule = rule.updateTime,
               !updateRule.isEmpty,
               let timeString = try? RuleParser.parse(html: html, rule: updateRule) else {
@@ -178,7 +201,7 @@ class TableOfContentsService {
         // 2. 从书源获取
         let tocURL = book.tocUrl
         guard let ruleTocData = source.ruleTocData,
-              let ruleToc = try? JSONDecoder().decode(BookSource.RuleToc.self, from: ruleTocData) else {
+              let ruleToc = try? JSONDecoder().decode(RuleToc.self, from: ruleTocData) else {
             throw ReaderError.noSource
         }
         
@@ -192,7 +215,7 @@ class TableOfContentsService {
     }
     
     /// 解析目录页面（支持分页）
-    private func parseTOCPage(url: String, ruleToc: BookSource.RuleToc, source: BookSource, accumulated: [TableOfContentsParser.ChapterInfo] = []) async throws -> [TableOfContentsParser.ChapterInfo] {
+    private func parseTOCPage(url: String, ruleToc: RuleToc, source: BookSource, accumulated: [TableOfContentsParser.ChapterInfo] = []) async throws -> [TableOfContentsParser.ChapterInfo] {
         guard let tocURL = URL(string: url) else {
             throw ReaderError.networkFailure
         }

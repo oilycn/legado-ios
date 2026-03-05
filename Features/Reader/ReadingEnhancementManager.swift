@@ -91,7 +91,30 @@ class ReadingEnhancementManager: ObservableObject {
         setupNotifications()
     }
     
-    deinit {
+    nonisolated deinit {
+        // 清理通知观察者
+        NotificationCenter.default.removeObserver(self)
+        // 停止定时器
+        readingTimer?.invalidate()
+        nightModeTimer?.invalidate()
+        volumeObserver = nil
+        // 恢复屏幕设置
+        Task { @MainActor in
+            UIApplication.shared.isIdleTimerDisabled = false
+        }
+    }
+
+        // 清理通知观察者
+        NotificationCenter.default.removeObserver(self)
+        // 停止定时器
+        readingTimer?.invalidate()
+        nightModeTimer?.invalidate()
+        volumeObserver = nil
+        // 恢复屏幕设置
+        Task { @MainActor in
+            UIApplication.shared.isIdleTimerDisabled = false
+        }
+    }
         cleanup()
     }
     
@@ -196,6 +219,12 @@ class ReadingEnhancementManager: ObservableObject {
     // MARK: - 私有方法
     
     private func startReadingTimer() {
+        readingTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+            Task { @MainActor [weak self] in
+                self?.updateReadingTime()
+            }
+        }
+    }
         readingTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 self?.updateReadingTime()
@@ -242,6 +271,16 @@ class ReadingEnhancementManager: ObservableObject {
     }
     
     private func startNightModeDetection() {
+        // 立即检查一次
+        updateNightMode()
+        
+        // 每分钟检查一次
+        nightModeTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { timer in
+            Task { @MainActor [weak self] in
+                self?.updateNightMode()
+            }
+        }
+    }
         // 立即检查一次
         updateNightMode()
         

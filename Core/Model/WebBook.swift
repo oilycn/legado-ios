@@ -11,7 +11,7 @@ import CoreData
 import SwiftSoup
 
 /// 搜索结果
-struct SearchBook {
+struct SearchBookResult {
     var name: String = ""
     var author: String = ""
     var bookUrl: String = ""
@@ -43,7 +43,7 @@ class WebBook {
         source: BookSource,
         key: String,
         page: Int = 1
-    ) async throws -> [SearchBook] {
+    ) async throws -> [SearchBookResult] {
         guard let searchUrl = source.searchUrl, !searchUrl.isEmpty else {
             throw WebBookError.noSearchUrl
         }
@@ -370,17 +370,17 @@ class WebBook {
         introRule: String?,
         lastChapterRule: String?,
         wordCountRule: String?
-    ) throws -> [SearchBook] {
+    ) throws -> [SearchBookResult] {
         let elements = try ruleEngine.getElements(
             ruleStr: bookListRule,
             body: body,
             baseUrl: baseUrl
         )
         
-        var books: [SearchBook] = []
+        var books: [SearchBookResult] = []
         
         for elementCtx in elements {
-            var book = SearchBook()
+            var book = SearchBookResult()
             book.sourceUrl = source.bookSourceUrl
             book.sourceName = source.bookSourceName
             

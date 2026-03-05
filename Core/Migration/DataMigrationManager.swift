@@ -403,7 +403,7 @@ class DataMigrationManager: ObservableObject {
         ]
     }
     }
-    
+
     private func exportRule(_ rule: ReplaceRule) -> [String: Any] {
         return [
             "name": rule.name,

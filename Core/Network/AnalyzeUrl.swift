@@ -221,7 +221,7 @@ class AnalyzeUrl {
         }
 
         if analyzedUrl.webView {
-            let fetcher = WebViewHTMLFetcher()
+            let fetcher = await WebViewHTMLFetcher()
             let result = try await fetcher.fetchHTML(request: request, timeout: request.timeoutInterval)
             return (result.html, result.finalURL)
         }
@@ -326,7 +326,7 @@ private final class WebViewHTMLFetcher: NSObject, WKNavigationDelegate {
         }
     }
 
-    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+    nonisolated func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         Task { @MainActor in
             do {
                 try await Task.sleep(nanoseconds: 150_000_000)
@@ -351,11 +351,11 @@ private final class WebViewHTMLFetcher: NSObject, WKNavigationDelegate {
         }
     }
 
-    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+    nonisolated func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         finish(.failure(error))
     }
 
-    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+    nonisolated func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         finish(.failure(error))
     }
 

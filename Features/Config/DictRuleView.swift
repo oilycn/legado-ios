@@ -9,7 +9,7 @@
 import SwiftUI
 
 // MARK: - 词典规则模型
-struct DictRule: Identifiable, Codable {
+struct DictRuleItem: Identifiable, Codable {
     var id = UUID()
     var name: String
     var urlRule: String          // URL 模板，用 {{word}} 作为关键词占位符
@@ -28,7 +28,7 @@ struct DictRule: Identifiable, Codable {
 // MARK: - 词典规则 ViewModel
 @MainActor
 class DictRuleViewModel: ObservableObject {
-    @Published var rules: [DictRule] = []
+    @Published var rules: [DictRuleItem] = []
     
     private let storageKey = "dict_rules"
     
@@ -41,7 +41,7 @@ class DictRuleViewModel: ObservableObject {
     
     func loadRules() {
         if let data = UserDefaults.standard.data(forKey: storageKey),
-           let decoded = try? JSONDecoder().decode([DictRule].self, from: data) {
+           let decoded = try? JSONDecoder().decode([DictRuleItem].self, from: data) {
             rules = decoded
         }
     }
@@ -52,7 +52,7 @@ class DictRuleViewModel: ObservableObject {
         }
     }
     
-    func addRule(_ rule: DictRule) {
+    func addRule(_ rule: DictRuleItem) {
         rules.append(rule)
         saveRules()
     }
@@ -70,7 +70,7 @@ class DictRuleViewModel: ObservableObject {
         saveRules()
     }
     
-    func toggleRule(_ rule: DictRule) {
+    func toggleRule(_ rule: DictRuleItem) {
         if let index = rules.firstIndex(where: { $0.id == rule.id }) {
             rules[index].enabled.toggle()
             saveRules()
@@ -80,7 +80,9 @@ class DictRuleViewModel: ObservableObject {
     /// 预置默认词典
     private func loadDefaultRules() {
         rules = [
-            DictRule(name: "百度翻译", urlRule: "https://fanyi.baidu.com/#auto/zh/{{word}}", sortOrder: 0),
+            DictRuleItem(name: "百度翻译", urlRule: "https://fanyi.baidu.com/#auto/zh/{{word}}", sortOrder: 0),
+            DictRuleItem(name: "有道词典", urlRule: "https://dict.youdao.com/m/result?word={{word}}&lang=en", sortOrder: 1),
+            DictRuleItem(name: "Google 翻译", urlRule: "https://translate.google.com/?sl=auto&tl=zh-CN&text={{word}}", sortOrder: 2),
             DictRule(name: "有道词典", urlRule: "https://dict.youdao.com/m/result?word={{word}}&lang=en", sortOrder: 1),
             DictRule(name: "Google 翻译", urlRule: "https://translate.google.com/?sl=auto&tl=zh-CN&text={{word}}", sortOrder: 2),
             DictRule(name: "维基百科", urlRule: "https://zh.m.wikipedia.org/wiki/{{word}}", showInPanel: false, sortOrder: 3)
@@ -93,7 +95,7 @@ class DictRuleViewModel: ObservableObject {
 struct DictRuleView: View {
     @StateObject private var viewModel = DictRuleViewModel()
     @State private var showingAddRule = false
-    @State private var editingRule: DictRule?
+    @State private var editingRule: DictRuleItem?
     
     var body: some View {
         List {
@@ -176,7 +178,7 @@ struct DictRuleView: View {
 // MARK: - 词典规则编辑视图
 struct DictRuleEditView: View {
     @ObservedObject var viewModel: DictRuleViewModel
-    let rule: DictRule?
+    let rule: DictRuleItem?
     
     @Environment(\.dismiss) private var dismiss
     @State private var name = ""
@@ -207,7 +209,7 @@ struct DictRuleEditView: View {
                 
                 if !urlRule.isEmpty {
                     Section("预览") {
-                        if let url = DictRule(name: name, urlRule: urlRule).buildUrl(word: "测试") {
+                        if let url = DictRuleItem(name: name, urlRule: urlRule).buildUrl(word: "测试") {
                             Link(url.absoluteString, destination: url)
                                 .font(.caption)
                                 .lineLimit(2)
@@ -249,7 +251,7 @@ struct DictRuleEditView: View {
             viewModel.rules[index].enabled = enabled
             viewModel.saveRules()
         } else {
-            let newRule = DictRule(
+            let newRule = DictRuleItem(
                 name: name,
                 urlRule: urlRule,
                 showInPanel: showInPanel,

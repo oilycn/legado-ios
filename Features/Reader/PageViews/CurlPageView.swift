@@ -86,7 +86,7 @@ extension CurlPageView {
             viewControllerBefore viewController: UIViewController
         ) -> UIViewController? {
             guard let index = index(of: viewController), index > 0 else { return nil }
-            return viewController(at: index - 1)
+            return self.viewController(at: index - 1)
         }
         
         func pageViewController(
@@ -94,7 +94,7 @@ extension CurlPageView {
             viewControllerAfter viewController: UIViewController
         ) -> UIViewController? {
             guard let index = index(of: viewController), index < parent.pages.count - 1 else { return nil }
-            return viewController(at: index + 1)
+            return self.viewController(at: index + 1)
         }
         
         // MARK: - UIPageViewControllerDelegate
