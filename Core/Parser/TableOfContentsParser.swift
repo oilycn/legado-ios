@@ -238,7 +238,7 @@ class TableOfContentsService {
                 url: chapterInfo.url,
                 index: chapterInfo.index + startIndex
             )
-
+        }
         
         var allChapters = accumulated + chapters
         
@@ -311,14 +311,17 @@ class TableOfContentsService {
     }
 }
 
-// MARK: - 错误扩展
-extension ReaderError {
-    static let parseFailed = { (reason: String) -> ReaderError in
-        struct ParseFailedError: LocalizedError {
-            let reason: String
-            var errorDescription: String? { "解析失败：\(reason)" }
+// MARK: - 阅读器错误类型
+enum ReaderError: LocalizedError {
+    case noSource
+    case networkFailure
+    case parseFailed(String)
+    
+    var errorDescription: String? {
+        switch self {
+        case .noSource: return "书源不可用"
+        case .networkFailure: return "网络请求失败"
+        case .parseFailed(let reason): return "解析失败：\(reason)"
         }
-        // 返回网络失败，因为无法创建新的 case
-        return .networkFailure
     }
 }
