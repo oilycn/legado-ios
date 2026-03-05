@@ -246,8 +246,9 @@ class DataMigrationManager: ObservableObject {
             }
             
             // 书源信息
-            book.origin = bookData["origin"] as? String ?? bookData["bookSourceUrl"] as? String
-            book.originName = bookData["originName"] as? String ?? bookData["bookSourceName"] as? String
+            book.origin = bookData["origin"] as? String ?? bookData["bookSourceUrl"] as? String ?? ""
+            book.originName = bookData["originName"] as? String ?? bookData["bookSourceName"] as? String ?? ""
+
             
             count += 1
             migrationProgress = Double(count) / Double(books.count) * 0.4
@@ -313,15 +314,13 @@ class DataMigrationManager: ObservableObject {
         for bookmarkData in bookmarks {
             let bookmark = Bookmark.create(in: context)
             
-            bookmark.chapterName = bookmarkData["chapterName"] as? String ?? ""
+            bookmark.chapterTitle = bookmarkData["chapterName"] as? String ?? ""
             bookmark.content = bookmarkData["content"] as? String ?? ""
             
             if let chapterIndex = bookmarkData["chapterIndex"] as? Int {
                 bookmark.chapterIndex = Int32(chapterIndex)
             }
-            if let chapterPos = bookmarkData["chapterPos"] as? Int {
-                bookmark.pos = Int32(chapterPos)
-            }
+
             
             count += 1
             migrationProgress = 0.7 + Double(count) / Double(bookmarks.count) * 0.15
@@ -398,11 +397,11 @@ class DataMigrationManager: ObservableObject {
     
     private func exportBookmark(_ bookmark: Bookmark) -> [String: Any] {
         return [
-            "chapterName": bookmark.chapterName,
+            "chapterName": bookmark.chapterTitle,
             "content": bookmark.content,
-            "chapterIndex": bookmark.chapterIndex,
-            "chapterPos": bookmark.pos
+            "chapterIndex": bookmark.chapterIndex
         ]
+    }
     }
     
     private func exportRule(_ rule: ReplaceRule) -> [String: Any] {
