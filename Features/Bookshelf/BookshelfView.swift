@@ -39,7 +39,7 @@ struct BookshelfView: View {
                 .pickerStyle(.segmented)
             }
             
-            ToolbarItem(placement: .navigationBarTrailing) {
+ToolbarItem(placement: .navigationBarTrailing) {
                 HStack(spacing: 12) {
                     Button(action: { showingSearch = true }) {
                         Image(systemName: "magnifyingglass")
@@ -47,6 +47,22 @@ struct BookshelfView: View {
 
                     Button(action: { showingSourceManage = true }) {
                         Image(systemName: "gearshape")
+                    }
+                    
+                    Button(action: {
+                        DocumentPickerHelper.shared.present(contentTypes: [.plainText, .epub]) { urls in
+                            guard let url = urls.first else { return }
+                            Task { @MainActor in
+                                do {
+                                    try await localBookViewModel.importBook(url: url)
+                                    await viewModel.loadBooks()
+                                } catch {
+                                    localBookViewModel.errorMessage = "导入失败：\(error.localizedDescription)"
+                                }
+                            }
+                        }
+                    }) {
+                        Image(systemName: "square.and.arrow.down")
                     }
                     
                     Button(action: { showingAddBook = true }) {
@@ -59,16 +75,17 @@ struct BookshelfView: View {
             SourceManageView()
         }
         .sheet(isPresented: $showingAddBook) {
-            AddBookView { url in
+            AddBookView { url, completion in
                 Task {
-                    let granted = url.startAccessingSecurityScopedResource()
-                    defer { if granted { url.stopAccessingSecurityScopedResource() } }
                     do {
                         try await localBookViewModel.importBook(url: url)
                         await viewModel.loadBooks()
                     } catch {
-                        print("导入失败：\(error)")
+                        await MainActor.run {
+                            localBookViewModel.errorMessage = "导入失败：\(error.localizedDescription)"
+                        }
                     }
+                    completion()
                 }
             }
         }
