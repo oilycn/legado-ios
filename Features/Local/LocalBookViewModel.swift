@@ -352,8 +352,8 @@ struct LocalBookView: View {
         }
         .fileImporter(
             isPresented: $showingFilePicker,
-            allowedContentTypes: [.plainText, .item],
-            allowsMultipleSelection: false
+            allowedContentTypes: [.plainText, .epub],
+            allowsMultipleSelection: true
         ) { result in
             switch result {
             case .success(let urls):
