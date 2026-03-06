@@ -6,20 +6,24 @@
 //
 
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct AddBookView: View {
     @Environment(\.dismiss) var dismiss
-    @Binding var pendingFilePicker: Bool
+    var onLocalImport: (URL) -> Void
 
     @State private var showingQRScanner = false
     @State private var showingSearch = false
-    
+
     var body: some View {
         NavigationView {
             List {
                 Button {
-                    pendingFilePicker = true
-                    dismiss()
+                    DocumentPickerHelper.shared.present(contentTypes: [.plainText, .epub]) { urls in
+                        guard let url = urls.first else { return }
+                        onLocalImport(url)
+                        dismiss()
+                    }
                 } label: {
                     Label("本地导入", systemImage: "folder")
                 }
@@ -39,9 +43,7 @@ struct AddBookView: View {
             .navigationTitle("添加书籍")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("取消") {
-                        dismiss()
-                    }
+                    Button("取消") { dismiss() }
                 }
             }
             .sheet(isPresented: $showingQRScanner) {
@@ -55,5 +57,5 @@ struct AddBookView: View {
 }
 
 #Preview {
-    AddBookView(pendingFilePicker: .constant(false))
+    AddBookView(onLocalImport: { _ in })
 }

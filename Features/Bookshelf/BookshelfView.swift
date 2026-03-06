@@ -14,8 +14,6 @@ struct BookshelfView: View {
     @State private var showingSourceManage = false
     @State private var showingAddBook = false
     @State private var showingSearch = false
-    @State private var showingFilePicker = false
-    @State private var pendingFilePicker = false
     
     var body: some View {
         Group {
@@ -60,30 +58,11 @@ struct BookshelfView: View {
         .sheet(isPresented: $showingSourceManage) {
             SourceManageView()
         }
-        .sheet(isPresented: $showingAddBook, onDismiss: {
-            if pendingFilePicker {
-                pendingFilePicker = false
-                showingFilePicker = true
-            }
-        }) {
-            AddBookView(pendingFilePicker: $pendingFilePicker)
-        }
-        .sheet(isPresented: $showingSearch) {
-            NavigationStack { SearchResultView() }
-        }
-        .fileImporter(
-            isPresented: $showingFilePicker,
-            allowedContentTypes: [.plainText, .epub],
-            allowsMultipleSelection: false
-        ) { result in
-            switch result {
-            case .success(let urls):
-                guard let url = urls.first else { return }
+        .sheet(isPresented: $showingAddBook) {
+            AddBookView { url in
                 Task {
                     let granted = url.startAccessingSecurityScopedResource()
-                    defer {
-                        if granted { url.stopAccessingSecurityScopedResource() }
-                    }
+                    defer { if granted { url.stopAccessingSecurityScopedResource() } }
                     do {
                         try await localBookViewModel.importBook(url: url)
                         await viewModel.loadBooks()
@@ -91,9 +70,10 @@ struct BookshelfView: View {
                         print("导入失败：\(error)")
                     }
                 }
-            case .failure(let error):
-                localBookViewModel.errorMessage = "选择文件失败：\(error.localizedDescription)"
             }
+        }
+        .sheet(isPresented: $showingSearch) {
+            NavigationStack { SearchResultView() }
         }
         .alert("导入成功", isPresented: Binding(
             get: { localBookViewModel.successMessage != nil },

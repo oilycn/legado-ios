@@ -116,6 +116,7 @@
 		1A00000000000084 /* BookmarkSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000084 /* BookmarkSheet.swift */; };
 		1A00000000000085 /* ChapterCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000085 /* ChapterCacheManager.swift */; };
 		1A00000000000086 /* UTType+EPUB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000086 /* UTType+EPUB.swift */; };
+		1A00000000000087 /* DocumentPickerHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000087 /* DocumentPickerHelper.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -227,6 +228,7 @@
 		1A10000000000084 /* BookmarkSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkSheet.swift; sourceTree = "<group>"; };
 		1A10000000000085 /* ChapterCacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChapterCacheManager.swift; sourceTree = "<group>"; };
 		1A10000000000086 /* UTType+EPUB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UTType+EPUB.swift"; sourceTree = "<group>"; };
+		1A10000000000087 /* DocumentPickerHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPickerHelper.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -326,6 +328,7 @@
 			children = (
 				1A10000000000032 /* AppConstants.swift */,
 				1A10000000000086 /* UTType+EPUB.swift */,
+				1A10000000000087 /* DocumentPickerHelper.swift */,
 			);
 			path = Config;
 			sourceTree = "<group>";
@@ -701,6 +704,7 @@
 				1A00000000000084 /* BookmarkSheet.swift in Sources */,
 1A00000000000085 /* ChapterCacheManager.swift in Sources */,
 				1A00000000000086 /* UTType+EPUB.swift in Sources */,
+				1A00000000000087 /* DocumentPickerHelper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
