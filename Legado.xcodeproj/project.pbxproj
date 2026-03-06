@@ -116,7 +116,10 @@
 		1A00000000000084 /* BookmarkSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000084 /* BookmarkSheet.swift */; };
 		1A00000000000085 /* ChapterCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000085 /* ChapterCacheManager.swift */; };
 		1A00000000000086 /* UTType+EPUB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000086 /* UTType+EPUB.swift */; };
-		1A00000000000087 /* DocumentPickerHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000087 /* DocumentPickerHelper.swift */; };
+1A00000000000087 /* DocumentPickerHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000087 /* DocumentPickerHelper.swift */; };
+		1A00000000000088 /* URLSchemeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000088 /* URLSchemeHandler.swift */; };
+		1A00000000000089 /* URLConfirmHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A10000000000089 /* URLConfirmHelper.swift */; };
+		1A0000000000008A /* VerificationWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1000000000008A /* VerificationWebView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -228,7 +231,10 @@
 		1A10000000000084 /* BookmarkSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkSheet.swift; sourceTree = "<group>"; };
 		1A10000000000085 /* ChapterCacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChapterCacheManager.swift; sourceTree = "<group>"; };
 		1A10000000000086 /* UTType+EPUB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UTType+EPUB.swift"; sourceTree = "<group>"; };
-		1A10000000000087 /* DocumentPickerHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPickerHelper.swift; sourceTree = "<group>"; };
+1A10000000000087 /* DocumentPickerHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPickerHelper.swift; sourceTree = "<group>"; };
+		1A10000000000088 /* URLSchemeHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSchemeHandler.swift; sourceTree = "<group>"; };
+		1A10000000000089 /* URLConfirmHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLConfirmHelper.swift; sourceTree = "<group>"; };
+		1A1000000000008A /* VerificationWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerificationWebView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -323,12 +329,13 @@
 			path = Cache;
 			sourceTree = "<group>";
 		};
-		1A30000000000015 /* Config */ = {
+1A30000000000015 /* Config */ = {
 			isa = PBXGroup;
 			children = (
 				1A10000000000032 /* AppConstants.swift */,
 				1A10000000000086 /* UTType+EPUB.swift */,
 				1A10000000000087 /* DocumentPickerHelper.swift */,
+				1A10000000000089 /* URLConfirmHelper.swift */,
 			);
 			path = Config;
 			sourceTree = "<group>";
@@ -703,8 +710,11 @@
 				1A00000000000083 /* ChangeSourceSheet.swift in Sources */,
 				1A00000000000084 /* BookmarkSheet.swift in Sources */,
 1A00000000000085 /* ChapterCacheManager.swift in Sources */,
-				1A00000000000086 /* UTType+EPUB.swift in Sources */,
+1A00000000000086 /* UTType+EPUB.swift in Sources */,
 				1A00000000000087 /* DocumentPickerHelper.swift in Sources */,
+				1A00000000000088 /* URLSchemeHandler.swift in Sources */,
+				1A00000000000089 /* URLConfirmHelper.swift in Sources */,
+				1A0000000000008A /* VerificationWebView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
