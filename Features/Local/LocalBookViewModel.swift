@@ -15,6 +15,7 @@ class LocalBookViewModel: ObservableObject {
     @Published var localBooks: [Book] = []
     @Published var isImporting = false
     @Published var errorMessage: String?
+    @Published var successMessage: String?
     
     // MARK: - 导入本地书籍
     func importBook(url: URL) async throws -> Book {
@@ -51,11 +52,13 @@ class LocalBookViewModel: ObservableObject {
             try CoreDataStack.shared.save()
             
             isImporting = false
+            successMessage = "导入成功：\(book.name)"
             await loadLocalBooks()
             
             return book
         } catch {
             isImporting = false
+            errorMessage = "导入失败：\(error.localizedDescription)"
             throw error
         }
     }
@@ -316,7 +319,7 @@ struct LocalBookView: View {
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                                 
-                                Text(book.originName)
+                                Text(book.originName ?? "")
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }
@@ -338,31 +341,59 @@ struct LocalBookView: View {
         .toolbar {
             ToolbarItem {
                 Button(action: { showingFilePicker = true }) {
-                    Label("导入", systemImage: "plus")
+                    if viewModel.isImporting {
+                        ProgressView()
+                    } else {
+                        Label("导入", systemImage: "plus")
+                    }
                 }
+                .disabled(viewModel.isImporting)
             }
         }
         .fileImporter(
             isPresented: $showingFilePicker,
-            allowedContentTypes: [.plainText, .epub],
-            allowsMultipleSelection: true
+            allowedContentTypes: [.plainText, .item],
+            allowsMultipleSelection: false
         ) { result in
             switch result {
             case .success(let urls):
-                for url in urls {
-                    Task {
-                        let granted = url.startAccessingSecurityScopedResource()
-                        defer {
-                            if granted {
-                                url.stopAccessingSecurityScopedResource()
-                            }
+                guard let url = urls.first else { return }
+                Task {
+                    let granted = url.startAccessingSecurityScopedResource()
+                    defer {
+                        if granted {
+                            url.stopAccessingSecurityScopedResource()
                         }
-                        try? await viewModel.importBook(url: url)
+                    }
+                    do {
+                        try await viewModel.importBook(url: url)
+                    } catch {
+                        print("导入失败：\(error)")
                     }
                 }
             case .failure(let error):
-                print("导入失败：\(error)")
+                viewModel.errorMessage = "选择文件失败：\(error.localizedDescription)"
             }
+        }
+        .alert("导入成功", isPresented: Binding(
+            get: { viewModel.successMessage != nil },
+            set: { if !$0 { viewModel.successMessage = nil } }
+        )) {
+            Button("确定", role: .cancel) {
+                viewModel.successMessage = nil
+            }
+        } message: {
+            Text(viewModel.successMessage ?? "")
+        }
+        .alert("导入失败", isPresented: Binding(
+            get: { viewModel.errorMessage != nil },
+            set: { if !$0 { viewModel.errorMessage = nil } }
+        )) {
+            Button("确定", role: .cancel) {
+                viewModel.errorMessage = nil
+            }
+        } message: {
+            Text(viewModel.errorMessage ?? "未知错误")
         }
         .task {
             await viewModel.loadLocalBooks()
