@@ -10,9 +10,12 @@ import CoreData
 
 struct BookshelfView: View {
     @StateObject private var viewModel = BookshelfViewModel()
+    @StateObject private var localBookViewModel = LocalBookViewModel()
     @State private var showingSourceManage = false
     @State private var showingAddBook = false
     @State private var showingSearch = false
+    // fileImporter 上提到此层，避免三层嵌套 sheet 导致回调不触发
+    @State private var showingFilePicker = false
     
     var body: some View {
         Group {
@@ -58,10 +61,51 @@ struct BookshelfView: View {
             SourceManageView()
         }
         .sheet(isPresented: $showingAddBook) {
-            AddBookView()
+            AddBookView(showingFilePicker: $showingFilePicker)
         }
         .sheet(isPresented: $showingSearch) {
             NavigationStack { SearchResultView() }
+        }
+        // fileImporter 挂在最外层（非嵌套 sheet），回调可正常触发
+        .fileImporter(
+            isPresented: $showingFilePicker,
+            allowedContentTypes: [.plainText, .epub],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                guard let url = urls.first else { return }
+                Task {
+                    let granted = url.startAccessingSecurityScopedResource()
+                    defer {
+                        if granted { url.stopAccessingSecurityScopedResource() }
+                    }
+                    do {
+                        try await localBookViewModel.importBook(url: url)
+                        await viewModel.loadBooks()
+                    } catch {
+                        print("导入失败：\(error)")
+                    }
+                }
+            case .failure(let error):
+                localBookViewModel.errorMessage = "选择文件失败：\(error.localizedDescription)"
+            }
+        }
+        .alert("导入成功", isPresented: Binding(
+            get: { localBookViewModel.successMessage != nil },
+            set: { if !$0 { localBookViewModel.successMessage = nil } }
+        )) {
+            Button("确定", role: .cancel) { localBookViewModel.successMessage = nil }
+        } message: {
+            Text(localBookViewModel.successMessage ?? "")
+        }
+        .alert("导入失败", isPresented: Binding(
+            get: { localBookViewModel.errorMessage != nil },
+            set: { if !$0 { localBookViewModel.errorMessage = nil } }
+        )) {
+            Button("确定", role: .cancel) { localBookViewModel.errorMessage = nil }
+        } message: {
+            Text(localBookViewModel.errorMessage ?? "未知错误")
         }
         .task {
             await viewModel.loadBooks()

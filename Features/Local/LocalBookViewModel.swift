@@ -291,7 +291,7 @@ enum LocalBookError: LocalizedError {
 // MARK: - 本地书籍视图
 struct LocalBookView: View {
     @StateObject private var viewModel = LocalBookViewModel()
-    @State private var showingFilePicker = false
+    var onImportTapped: () -> Void
     
     var body: some View {
         Group {
@@ -340,7 +340,7 @@ struct LocalBookView: View {
         .navigationTitle("本地书籍")
         .toolbar {
             ToolbarItem {
-                Button(action: { showingFilePicker = true }) {
+                Button(action: onImportTapped) {
                     if viewModel.isImporting {
                         ProgressView()
                     } else {
@@ -349,51 +349,6 @@ struct LocalBookView: View {
                 }
                 .disabled(viewModel.isImporting)
             }
-        }
-        .fileImporter(
-            isPresented: $showingFilePicker,
-            allowedContentTypes: [.plainText, .epub],
-            allowsMultipleSelection: true
-        ) { result in
-            switch result {
-            case .success(let urls):
-                guard let url = urls.first else { return }
-                Task {
-                    let granted = url.startAccessingSecurityScopedResource()
-                    defer {
-                        if granted {
-                            url.stopAccessingSecurityScopedResource()
-                        }
-                    }
-                    do {
-                        try await viewModel.importBook(url: url)
-                    } catch {
-                        print("导入失败：\(error)")
-                    }
-                }
-            case .failure(let error):
-                viewModel.errorMessage = "选择文件失败：\(error.localizedDescription)"
-            }
-        }
-        .alert("导入成功", isPresented: Binding(
-            get: { viewModel.successMessage != nil },
-            set: { if !$0 { viewModel.successMessage = nil } }
-        )) {
-            Button("确定", role: .cancel) {
-                viewModel.successMessage = nil
-            }
-        } message: {
-            Text(viewModel.successMessage ?? "")
-        }
-        .alert("导入失败", isPresented: Binding(
-            get: { viewModel.errorMessage != nil },
-            set: { if !$0 { viewModel.errorMessage = nil } }
-        )) {
-            Button("确定", role: .cancel) {
-                viewModel.errorMessage = nil
-            }
-        } message: {
-            Text(viewModel.errorMessage ?? "未知错误")
         }
         .task {
             await viewModel.loadLocalBooks()
