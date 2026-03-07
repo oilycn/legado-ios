@@ -172,7 +172,8 @@ final class WebDAVConfigViewModel: ObservableObject {
             throw URLError(.badURL)
         }
 
-        let credentials = WebDAVCredentials(
+let credentials = WebDAVCredentials(
+            url: trimmed,
             username: username.trimmingCharacters(in: .whitespacesAndNewlines),
             password: password
         )

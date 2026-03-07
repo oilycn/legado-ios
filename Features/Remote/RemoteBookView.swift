@@ -232,17 +232,18 @@ class RemoteBookViewModel: ObservableObject {
         
         isLoading = true
         do {
-            let localURL = try await client.download(path: file.path)
+            let data = try await client.download(path: file.path)
             
             let ext = (file.name as NSString).pathExtension.lowercased()
             if ext == "json" {
-                let data = try Data(contentsOf: localURL)
                 if let jsonString = String(data: data, encoding: .utf8) {
                     URLSchemeHandler.importBookSourceJSON(jsonString) { _ in }
                 }
             } else {
+                let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(file.name)
+                try data.write(to: tempURL)
                 let localBookVM = LocalBookViewModel()
-                try await localBookVM.importBook(url: localURL)
+                try await localBookVM.importBook(url: tempURL)
             }
         } catch {
             errorMessage = "导入失败：\(error.localizedDescription)"
