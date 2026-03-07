@@ -1,5 +1,6 @@
 import SwiftUI
 import WebKit
+import CoreData
 
 struct VerificationWebView: UIViewControllerRepresentable {
     let url: URL
@@ -57,9 +58,7 @@ struct VerificationWebView: UIViewControllerRepresentable {
         private func saveCookies(_ cookies: [HTTPCookie]) {
             let context = CoreDataStack.shared.viewContext
             for cookie in cookies {
-                let cookieEntity = Cookie.create(in: context)
-                cookieEntity.url = cookie.domain
-                cookieEntity.cookie = "\(cookie.name)=\(cookie.value)"
+                _ = Cookie.create(in: context, url: cookie.domain, cookie: "\(cookie.name)=\(cookie.value)")
             }
             try? context.save()
         }
@@ -72,9 +71,7 @@ struct VerificationWebView: UIViewControllerRepresentable {
                 if let equalsIndex = trimmed.firstIndex(of: "=") {
                     let name = String(trimmed[..<equalsIndex])
                     let value = String(trimmed[trimmed.index(after: equalsIndex)...])
-                    let cookieEntity = Cookie.create(in: context)
-                    cookieEntity.url = url?.host ?? ""
-                    cookieEntity.cookie = "\(name)=\(value)"
+                    _ = Cookie.create(in: context, url: url?.host ?? "", cookie: "\(name)=\(value)")
                 }
             }
             try? context.save()

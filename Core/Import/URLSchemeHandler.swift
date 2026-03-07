@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import CoreData
 
 enum URLSchemeAction {
     case importBookSource(url: URL)
@@ -9,6 +10,16 @@ enum URLSchemeAction {
     case importRssSourceJSON(String)
     case openBook(bookId: UUID)
     case unknown
+}
+
+extension Notification.Name {
+    static let openBookNotification = Notification.Name("openBookNotification")
+}
+
+private struct SourceJSON: Codable {
+    let bookSourceUrl: String
+    let bookSourceName: String
+    let bookSourceGroup: String?
 }
 
 struct URLSchemeHandler {
@@ -117,7 +128,7 @@ struct URLSchemeHandler {
         do {
             let decoder = JSONDecoder()
             if jsonString.hasPrefix("[") {
-                let sources = try decoder.decode([BookSourceJSON].self, from: data)
+                let sources = try decoder.decode([SourceJSON].self, from: data)
                 let context = CoreDataStack.shared.viewContext
                 var imported = 0
                 for json in sources {
@@ -130,7 +141,7 @@ struct URLSchemeHandler {
                 try context.save()
                 completion(.success("成功导入 \(imported) 个书源"))
             } else {
-                let json = try decoder.decode(BookSourceJSON.self, from: data)
+                let json = try decoder.decode(SourceJSON.self, from: data)
                 let context = CoreDataStack.shared.viewContext
                 let source = BookSource.create(in: context)
                 source.bookSourceUrl = json.bookSourceUrl
@@ -147,10 +158,4 @@ struct URLSchemeHandler {
     static func importRssSourceJSON(_ jsonString: String, completion: @escaping (Result<String, Error>) -> Void) {
         completion(.success("RSS 源导入成功"))
     }
-}
-
-private struct BookSourceJSON: Codable {
-    let bookSourceUrl: String
-    let bookSourceName: String
-    let bookSourceGroup: String?
 }
