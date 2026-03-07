@@ -548,12 +548,20 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		1A30000000000063 /* Remote */ = {
+1A30000000000063 /* Remote */ = {
 			isa = PBXGroup;
 			children = (
 				1A1000000000008B /* RemoteBookView.swift */,
 			);
 			path = Remote;
+			sourceTree = "<group>";
+		};
+		1A30000000000064 /* Integration */ = {
+			isa = PBXGroup;
+			children = (
+				1A1000000000008D /* IntegrationTests.swift */,
+			);
+			path = Integration;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
