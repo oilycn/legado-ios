@@ -272,7 +272,7 @@
 			path = App;
 			sourceTree = "<group>";
 		};
-		1A30000000000010 /* Core */ = {
+1A30000000000010 /* Core */ = {
 			isa = PBXGroup;
 			children = (
 				1A30000000000011 /* Persistence */,
@@ -283,6 +283,7 @@
 				1A30000000000013 /* RuleEngine */,
 				1A30000000000060 /* Sync */,
 				1A30000000000017 /* Model */,
+				1A30000000000062 /* Import */,
 				1A1000000000005E /* ReadingStatisticsManager.swift */,
 			);
 			path = Core;
@@ -360,7 +361,7 @@
 			path = Sync;
 			sourceTree = "<group>";
 		};
-		1A30000000000061 /* Models */ = {
+1A30000000000061 /* Models */ = {
 			isa = PBXGroup;
 			children = (
 				1A10000000000052 /* WebDAVCredentials.swift */,
@@ -368,6 +369,14 @@
 				1A10000000000054 /* BackupInfo.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		1A30000000000062 /* Import */ = {
+			isa = PBXGroup;
+			children = (
+				1A10000000000088 /* URLSchemeHandler.swift */,
+			);
+			path = Import;
 			sourceTree = "<group>";
 		};
 		1A30000000000017 /* Model */ = {
@@ -449,7 +458,7 @@
 			path = Search;
 			sourceTree = "<group>";
 		};
-		1A30000000000024 /* Source */ = {
+1A30000000000024 /* Source */ = {
 			isa = PBXGroup;
 			children = (
 				1A10000000000026 /* SourceManageView.swift */,
@@ -460,6 +469,7 @@
 				1A10000000000060 /* SourceDebugViewModel.swift */,
 				1A30000000000029 /* Components */,
 				1A10000000000043 /* QRCodeScanView.swift */,
+				1A1000000000008A /* VerificationWebView.swift */,
 			);
 			path = Source;
 			sourceTree = "<group>";
