@@ -103,6 +103,7 @@ class LocalBookViewModel: ObservableObject {
                 index: Int32(index),
                 title: chapter.title
             )
+            bookChapter.book = book
             bookChapter.wordCount = Int32(chapter.content.count)
             bookChapter.isCached = true
             bookChapter.cachePath = url.path
@@ -141,6 +142,7 @@ class LocalBookViewModel: ObservableObject {
                 index: Int32(chapter.index),
                 title: chapter.title
             )
+            bookChapter.book = book
             bookChapter.wordCount = Int32(chapter.content.count)
             bookChapter.isCached = true
         }
